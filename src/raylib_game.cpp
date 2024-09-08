@@ -29,8 +29,8 @@ Font font = { 0 };
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
 //----------------------------------------------------------------------------------
-static const int screenWidth = 800;
-static const int screenHeight = 450;
+static const int screenWidth = 852;
+static const int screenHeight = 393;
 
 // Required variables to manage screen transitions (fade-in, fade-out)
 static float transAlpha = 0.0f;
@@ -66,7 +66,7 @@ int main(void)
 
     // Setup and init first screen
     currentScreen = GAMEPLAY;
-    InitGameplayScreen();
+    init_game_screen();
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -88,7 +88,7 @@ int main(void)
     {
         case LOGO: UnloadLogoScreen(); break;
         case TITLE: UnloadTitleScreen(); break;
-        case GAMEPLAY: UnloadGameplayScreen(); break;
+        case GAMEPLAY: unload_game_screen(); break;
         case ENDING: UnloadEndingScreen(); break;
         default: break;
     }
@@ -115,7 +115,7 @@ static void ChangeToScreen(GameScreen screen)
     {
         case LOGO: UnloadLogoScreen(); break;
         case TITLE: UnloadTitleScreen(); break;
-        case GAMEPLAY: UnloadGameplayScreen(); break;
+        case GAMEPLAY: unload_game_screen(); break;
         case ENDING: UnloadEndingScreen(); break;
         default: break;
     }
@@ -125,7 +125,7 @@ static void ChangeToScreen(GameScreen screen)
     {
         case LOGO: InitLogoScreen(); break;
         case TITLE: InitTitleScreen(); break;
-        case GAMEPLAY: InitGameplayScreen(); break;
+        case GAMEPLAY: init_game_screen(); break;
         case ENDING: InitEndingScreen(); break;
         default: break;
     }
@@ -162,7 +162,7 @@ static void UpdateTransition(void)
                 case LOGO: UnloadLogoScreen(); break;
                 case TITLE: UnloadTitleScreen(); break;
                 case OPTIONS: UnloadOptionsScreen(); break;
-                case GAMEPLAY: UnloadGameplayScreen(); break;
+                case GAMEPLAY: unload_game_screen(); break;
                 case ENDING: UnloadEndingScreen(); break;
                 default: break;
             }
@@ -172,7 +172,7 @@ static void UpdateTransition(void)
             {
                 case LOGO: InitLogoScreen(); break;
                 case TITLE: InitTitleScreen(); break;
-                case GAMEPLAY: InitGameplayScreen(); break;
+                case GAMEPLAY: init_game_screen(); break;
                 case ENDING: InitEndingScreen(); break;
                 default: break;
             }
@@ -239,9 +239,9 @@ static void UpdateDrawFrame(void)
             } break;
             case GAMEPLAY:
             {
-                UpdateGameplayScreen();
+                update_game_screen();
 
-                if (FinishGameplayScreen() == 1) TransitionToScreen(ENDING);
+                if (finish_game_screen() == 1) TransitionToScreen(ENDING);
                 //else if (FinishGameplayScreen() == 2) TransitionToScreen(TITLE);
 
             } break;
@@ -269,7 +269,7 @@ static void UpdateDrawFrame(void)
             case LOGO: DrawLogoScreen(); break;
             case TITLE: DrawTitleScreen(); break;
             case OPTIONS: DrawOptionsScreen(); break;
-            case GAMEPLAY: DrawGameplayScreen(); break;
+            case GAMEPLAY: draw_game_screen(); break;
             case ENDING: DrawEndingScreen(); break;
             default: break;
         }

@@ -29,8 +29,8 @@
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
 //----------------------------------------------------------------------------------
-static int framesCounter = 0;
-static int finishScreen = 0;
+static int _frames_counter = 0;
+static int _finish_screen = 0;
 
 //----------------------------------------------------------------------------------
 // Title Screen Functions Definition
@@ -40,8 +40,8 @@ static int finishScreen = 0;
 void InitTitleScreen(void)
 {
     // TODO: Initialize TITLE screen variables here!
-    framesCounter = 0;
-    finishScreen = 0;
+    _frames_counter = 0;
+    _finish_screen = 0;
 }
 
 // Title Screen Update logic
@@ -53,7 +53,7 @@ void UpdateTitleScreen(void)
     if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
     {
         //finishScreen = 1;   // OPTIONS
-        finishScreen = 2;   // GAMEPLAY
+        _finish_screen = 2;   // GAMEPLAY
     }
 }
 
@@ -76,5 +76,5 @@ void UnloadTitleScreen(void)
 // Title Screen should finish?
 int FinishTitleScreen(void)
 {
-    return finishScreen;
+    return _finish_screen;
 }

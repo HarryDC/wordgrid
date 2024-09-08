@@ -71,11 +71,11 @@ int FinishOptionsScreen(void);
 //----------------------------------------------------------------------------------
 // Gameplay Screen Functions Declaration
 //----------------------------------------------------------------------------------
-void InitGameplayScreen(void);
-void UpdateGameplayScreen(void);
-void DrawGameplayScreen(void);
-void UnloadGameplayScreen(void);
-int FinishGameplayScreen(void);
+void init_game_screen(void);
+void update_game_screen(void);
+void draw_game_screen(void);
+void unload_game_screen(void);
+int finish_game_screen(void);
 
 //----------------------------------------------------------------------------------
 // Ending Screen Functions Declaration

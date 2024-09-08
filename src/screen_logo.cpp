@@ -29,8 +29,8 @@
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
 //----------------------------------------------------------------------------------
-static int framesCounter = 0;
-static int finishScreen = 0;
+static int _frames_counter = 0;
+static int _finish_screen = 0;
 
 static int logoPositionX = 0;
 static int logoPositionY = 0;
@@ -53,8 +53,8 @@ static float alpha = 1.0f;         // Useful for fading
 // Logo Screen Initialization logic
 void InitLogoScreen(void)
 {
-    finishScreen = 0;
-    framesCounter = 0;
+    _finish_screen = 0;
+    _frames_counter = 0;
     lettersCount = 0;
 
     logoPositionX = GetScreenWidth()/2 - 128;
@@ -74,12 +74,12 @@ void UpdateLogoScreen(void)
 {
     if (state == 0)                 // State 0: Top-left square corner blink logic
     {
-        framesCounter++;
+        _frames_counter++;
 
-        if (framesCounter == 80)
+        if (_frames_counter == 80)
         {
             state = 1;
-            framesCounter = 0;      // Reset counter... will be used later...
+            _frames_counter = 0;      // Reset counter... will be used later...
         }
     }
     else if (state == 1)            // State 1: Bars animation logic: top and left
@@ -98,26 +98,26 @@ void UpdateLogoScreen(void)
     }
     else if (state == 3)            // State 3: "raylib" text-write animation logic
     {
-        framesCounter++;
+        _frames_counter++;
 
         if (lettersCount < 10)
         {
-            if (framesCounter/12)   // Every 12 frames, one more letter!
+            if (_frames_counter/12)   // Every 12 frames, one more letter!
             {
                 lettersCount++;
-                framesCounter = 0;
+                _frames_counter = 0;
             }
         }
         else    // When all letters have appeared, just fade out everything
         {
-            if (framesCounter > 200)
+            if (_frames_counter > 200)
             {
                 alpha -= 0.02f;
 
                 if (alpha <= 0.0f)
                 {
                     alpha = 0.0f;
-                    finishScreen = 1;   // Jump to next screen
+                    _finish_screen = 1;   // Jump to next screen
                 }
             }
         }
@@ -129,7 +129,7 @@ void DrawLogoScreen(void)
 {
     if (state == 0)         // Draw blinking top-left square corner
     {
-        if ((framesCounter/10)%2) DrawRectangle(logoPositionX, logoPositionY, 16, 16, BLACK);
+        if ((_frames_counter/10)%2) DrawRectangle(logoPositionX, logoPositionY, 16, 16, BLACK);
     }
     else if (state == 1)    // Draw bars animation: top and left
     {
@@ -156,7 +156,7 @@ void DrawLogoScreen(void)
 
         DrawText(TextSubtext("raylib", 0, lettersCount), GetScreenWidth()/2 - 44, GetScreenHeight()/2 + 48, 50, Fade(BLACK, alpha));
 
-        if (framesCounter > 20) DrawText("powered by", logoPositionX, logoPositionY - 27, 20, Fade(DARKGRAY, alpha));
+        if (_frames_counter > 20) DrawText("powered by", logoPositionX, logoPositionY - 27, 20, Fade(DARKGRAY, alpha));
     }
 }
 
@@ -169,5 +169,5 @@ void UnloadLogoScreen(void)
 // Logo Screen should finish?
 int FinishLogoScreen(void)
 {
-    return finishScreen;
+    return _finish_screen;
 }

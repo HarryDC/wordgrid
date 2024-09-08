@@ -29,8 +29,8 @@
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
 //----------------------------------------------------------------------------------
-static int framesCounter = 0;
-static int finishScreen = 0;
+static int _frames_counter = 0;
+static int _finish_screen = 0;
 
 //----------------------------------------------------------------------------------
 // Ending Screen Functions Definition
@@ -40,8 +40,8 @@ static int finishScreen = 0;
 void InitEndingScreen(void)
 {
     // TODO: Initialize ENDING screen variables here!
-    framesCounter = 0;
-    finishScreen = 0;
+    _frames_counter = 0;
+    _finish_screen = 0;
 }
 
 // Ending Screen Update logic
@@ -52,7 +52,7 @@ void UpdateEndingScreen(void)
     // Press enter or tap to return to TITLE screen
     if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
     {
-        finishScreen = 1;
+        _finish_screen = 1;
     }
 }
 
@@ -76,5 +76,5 @@ void UnloadEndingScreen(void)
 // Ending Screen should finish?
 int FinishEndingScreen(void)
 {
-    return finishScreen;
+    return _finish_screen;
 }
