@@ -47,13 +47,17 @@ struct Board {
     float space_scale;
     int rows;
     int columns;
+    Vector2 board_position = {0};
     // Fixed space increase if we really need more
     char letters[32] = { 0 };
+    Vector2 well_position = { 0 };
+    static const int max_well_letters = 5;
+    char well[max_well_letters] = { 0 };
 };
 
 static Board _board;
 
-void letters_init(Letters *letters, const char* filename) {
+static void letters_init(Letters *letters, const char* filename) {
     int letter_width = 256;
     int letter_height = 256;
     int row_count = 7;
@@ -87,12 +91,12 @@ void letters_init(Letters *letters, const char* filename) {
     }
 }
 
-void letters_unload(Letters* letters) {
+static void letters_unload(Letters* letters) {
     UnloadTexture(letters->texture);
     letters->texture = { 0 };
 }
 
-void letters_draw(Letters* letters, char c, Vector2 pos, float scale)
+static void letters_draw(Letters* letters, char c, Vector2 pos, float scale)
 {
     int index = c - 96;
     Rectangle target = {
@@ -104,7 +108,7 @@ void letters_draw(Letters* letters, char c, Vector2 pos, float scale)
     DrawTexturePro(letters->texture, letters->rectangles[index], target, Vector2 { 0, 0 }, 0, WHITE);
 }
 
-void board_init(Board* board, const char* filename, int rows, int cols) {
+static void board_init(Board* board, const char* filename, int rows, int cols) {
     board->rows = rows;
     board->columns = cols;
     board->texture_space = LoadTexture(filename);
@@ -116,35 +120,50 @@ void board_init(Board* board, const char* filename, int rows, int cols) {
     for (int i = 0; i < rows * cols; ++i) {
         board->letters[i] = 'a';
     }
+
+    for (int i = 0; i < board->max_well_letters; ++i) {
+        board->well[i] = 'b';
+    }
 }
 
-void board_unload(Board* board) {
+static void board_unload(Board* board) {
     UnloadTexture(board->texture_space);
     board->texture_space = { 0 };
 }
 
-void board_draw(Board* board, Vector2 pos)
+static void board_draw(Board* board, Vector2 board_position, Vector2 well_position)
 {
     const int space_size = board->texture_space.width * board->space_scale;
     const int letter_margin = 8; // From image full scale is 32, we're using quarter size => 8
+    const float board_scale = .25;
+
+    // TODO #optimization unit sprite sheet into one and draw from one texture 
 
     for (int i = 0; i < board->rows; ++i) {
-        float x = pos.x + i * space_size;
+        float x = board_position.x + i * space_size;
         for (int j = 0; j < board->columns; ++j) {
-            float y = pos.y + j * space_size;
-            DrawTextureEx(board->texture_space, Vector2{ x, y }, 0, .25f, WHITE);
+            float y = board_position.y + j * space_size;
+            DrawTextureEx(board->texture_space, Vector2{ x, y }, 0, board_scale, WHITE);
         }
     }
 
+    for (int i = 0; i < board->max_well_letters; ++i) {
+        DrawTextureEx(board->texture_space, Vector2{ well_position.x, well_position.y + i * space_size }, 0, board_scale, WHITE);
+    }
+
     for (int i = 0; i < board->rows; ++i) {
-        float x = pos.x + i * space_size + letter_margin;
+        float x = board_position.x + i * space_size + letter_margin;
         for (int j = 0; j < board->columns; ++j) {
-            float y = pos.y + j * space_size + letter_margin;
+            float y = board_position.y + j * space_size + letter_margin;
             int letter = board->letters[i * board->columns + j];
             if (letter > 0) {
                 letters_draw(&_letters, letter, Vector2{ x,y }, .25f);
             }
         }
+    }
+
+    for (int i = 0; i < board->max_well_letters; ++i) {
+        letters_draw(&_letters, board->well[i], Vector2{ well_position.x + letter_margin,well_position.y + i * space_size + letter_margin }, .25f);
     }
 }
 
@@ -184,14 +203,9 @@ void draw_game_screen(void)
         ++c;
     }
     // TODO: Draw GAMEPLAY screen here!
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), PURPLE);
-    Vector2 pos = { 20, 10 };
-    DrawTextEx(font, "GAMEPLAY SCREEN", pos, font.baseSize*3.0f, 4, MAROON);
-    DrawText("PRESS ENTER or TAP to JUMP to ENDING SCREEN", 130, 220, 20, MAROON);
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
 
-    board_draw(&_board, Vector2(20, 20));
-
-
+    board_draw(&_board, Vector2(20, 20), Vector2(400, 20));
 }
 
 // Gameplay Screen Unload logic
