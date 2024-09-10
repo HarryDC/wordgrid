@@ -27,6 +27,9 @@
 #include "raymath.h"
 #include "screens.h"
 
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+
 #include "dictionary.h"
 
 //----------------------------------------------------------------------------------
@@ -178,6 +181,12 @@ static void board_set_letter(Board* board, int x, int y, char c) {
         return;
     }
     board->letters[x * board->rows + y] = c;
+}
+
+static void board_reset(Board* board) {
+    for (int i = 0; i < 32; ++i) {
+        board->letters[i] = -1;
+    }
 }
 
 static void board_unload(Board* board) {
@@ -350,6 +359,11 @@ void draw_game_screen(void)
     if (_drag_info.is_dragging) {
         letters_draw(&_letters, _drag_info.letter, _drag_info.position, 0.25f);
     }
+
+    if (GuiButton(Rectangle{ .x = 500, .y = 20, .width = 100, .height = 40 }, "Reset Board")) {
+        board_reset(&_board);
+    }
+
 }
 
 // Gameplay Screen Unload logic

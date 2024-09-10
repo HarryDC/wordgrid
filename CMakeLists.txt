@@ -16,12 +16,21 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+    raygui
+    DOWNLOAD_EXTRACT_TIMESTAMP OFF
+    GIT_REPOSITORY https://github.com/raysan5/raygui.git
+	SOURCE_SUBDIR projects/CMake
+    FIND_PACKAGE_ARGS
+)
+
+FetchContent_Declare(
     unity
     GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
     FIND_PACKAGE_ARGS
 )
 
 FetchContent_MakeAvailable(raylib unity)
+FetchContent_MakeAvailable(raygui )
 
 add_subdirectory(src)
 add_subdirectory(test)
