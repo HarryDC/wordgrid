@@ -1,6 +1,6 @@
 #include "unity.h"
 #include "raylib.h"
-#include "dictionary.cpp"
+#include "dictionary.h"
 
 void setUp(void) {
     // set stuff up here

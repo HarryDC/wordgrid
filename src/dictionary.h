@@ -1,3 +1,5 @@
+#pragma once
+
 #include "raylib.h"
 
 #include <stdlib.h>
@@ -39,9 +41,6 @@ Dictionary dictionary_load(const char* filename)
         skip_crlf = 2;
         result.mode = Mode::CRLF;
     }
-
-    int target_size = 1024;
-    int growth = 1.4;
 
     int codepoint_count = -1;
     int* words = LoadCodepoints(data, &codepoint_count);

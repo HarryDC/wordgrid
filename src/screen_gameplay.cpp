@@ -24,8 +24,10 @@
 **********************************************************************************************/
 
 #include "raylib.h"
+#include "raymath.h"
 #include "screens.h"
-#include <raymath.h>
+
+#include "dictionary.h"
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -56,7 +58,7 @@ struct Layout {
     Rectangle board_rect;
     Vector2 well_pos;
     Rectangle well_rect;
-    int tile_size;
+    float tile_size;
 };
 
 static Layout _layout;
@@ -68,10 +70,10 @@ struct Board {
     int columns;
     Vector2 board_position = {0};
     // Fixed space increase if we really need more
-    char letters[32] = { 0 };
+    int letters[32] = { 0 };
     Vector2 well_position = { 0 };
     static const int max_well_letters = 5;
-    char well[max_well_letters] = { 0 };
+    int well[max_well_letters] = { 0 };
 };
 
 static Board _board;
@@ -84,6 +86,8 @@ struct DragInfo {
 };
 
 static DragInfo _drag_info;
+
+static Dictionary _dictionary;
 
 static void letters_init(Letters *letters, const char* filename) {
     int letter_width = 256;
@@ -119,12 +123,18 @@ static void letters_init(Letters *letters, const char* filename) {
     }
 }
 
+
+static int random_letter()
+{
+    return GetRandomValue('a', 'z');
+}
+
 static void letters_unload(Letters* letters) {
     UnloadTexture(letters->texture);
     letters->texture = { 0 };
 }
 
-static void letters_draw(Letters* letters, char c, Vector2 pos, float scale)
+static void letters_draw(Letters* letters, int c, Vector2 pos, float scale)
 {
     int index = c - 96;
     Rectangle target = {
@@ -150,7 +160,7 @@ static void board_init(Board* board, const char* filename, int rows, int cols) {
     }
 
     for (int i = 0; i < board->max_well_letters; ++i) {
-        board->well[i] = 'b' + i;
+        board->well[i] = random_letter();
     }
 }
 
@@ -177,7 +187,7 @@ static void board_unload(Board* board) {
 
 static void board_draw(Board* board, Vector2 board_position, Vector2 well_position)
 {
-    const int space_size = board->texture_space.width * board->space_scale;
+    const float space_size = (float)board->texture_space.width * board->space_scale;
     const int letter_margin = 8; // From image full scale is 32, we're using quarter size => 8
     const float board_scale = .25;
 
@@ -230,8 +240,8 @@ static void drag_update(DragInfo* drag, Board* board) {
 
     if (_current_action == Action::Pickup) {
         if (CheckCollisionPointRec(mouse_pos, _layout.well_rect)) {
-            int dist = mouse_pos.y - _layout.well_rect.y;
-            int index = dist / _layout.tile_size;
+            float dist = mouse_pos.y - _layout.well_rect.y;
+            int index = (int)(dist / _layout.tile_size);
             if (index < 0 || index > board->max_well_letters) {
                 TraceLog(LOG_WARNING, "Mouse pickup error, index wrong [%s], ", index);
                 return;
@@ -254,6 +264,10 @@ static void drag_update(DragInfo* drag, Board* board) {
             if (letter == -1) {
                 drop_success = true;
                 board_set_letter(board, x, y, drag->letter);
+                board->well[drag->original_index] = random_letter();
+
+                // Check Word horizontal, CheckWord vertical
+                // Remove if match
             }
         }
 
@@ -303,7 +317,9 @@ void init_game_screen(void)
         .height = tile_size * _board.max_well_letters
     };
     _layout.well_pos = Vector2{ _layout.well_rect.x, _layout.well_rect.y };
-    _layout.tile_size = tile_size ;
+    _layout.tile_size = tile_size;
+
+    _dictionary = dictionary_load("resources/text/en/words.txt");
 }
 
 // Gameplay Screen Update logic
