@@ -25,12 +25,21 @@
 
 #include "raylib.h"
 #include "screens.h"
+#include <raymath.h>
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
 //----------------------------------------------------------------------------------
 static int _frames_counter = 0;
 static int _finish_screen = 0;
+
+enum class Action {
+    None,
+    Pickup,
+    Drop,
+};
+
+Action _current_action = Action::None;
 
 struct Letters {
     // ASCII only for now
@@ -41,6 +50,16 @@ struct Letters {
 };
 
 static Letters _letters;
+
+struct Layout {
+    Vector2 board_pos;
+    Rectangle board_rect;
+    Vector2 well_pos;
+    Rectangle well_rect;
+    int tile_size;
+};
+
+static Layout _layout;
 
 struct Board {
     Texture2D texture_space;
@@ -56,6 +75,15 @@ struct Board {
 };
 
 static Board _board;
+
+struct DragInfo {
+    bool is_dragging = false;
+    int original_index = -1;
+    char letter = -1;
+    Vector2 position{ 0 };
+};
+
+static DragInfo _drag_info;
 
 static void letters_init(Letters *letters, const char* filename) {
     int letter_width = 256;
@@ -118,12 +146,28 @@ static void board_init(Board* board, const char* filename, int rows, int cols) {
     }
     board->space_scale = .25f;
     for (int i = 0; i < rows * cols; ++i) {
-        board->letters[i] = 'a';
+        board->letters[i] = -1;
     }
 
     for (int i = 0; i < board->max_well_letters; ++i) {
-        board->well[i] = 'b';
+        board->well[i] = 'b' + i;
     }
+}
+
+static char board_get_letter(Board* board, int x, int y) {
+    if (x < 0 || x >= board->columns || y < 0 || y >= board->rows) {
+        TraceLog(LOG_FATAL, "Invalid access to board (%i,%i)", x, y);
+        return -1;
+    }
+    return board->letters[x * board->rows + y];
+}
+
+static void board_set_letter(Board* board, int x, int y, char c) {
+    if (x < 0 || x >= board->columns || y < 0 || y >= board->rows) {
+        TraceLog(LOG_FATAL, "Invalid access to board (%i,%i)", x, y);
+        return;
+    }
+    board->letters[x * board->rows + y] = c;
 }
 
 static void board_unload(Board* board) {
@@ -163,8 +207,71 @@ static void board_draw(Board* board, Vector2 board_position, Vector2 well_positi
     }
 
     for (int i = 0; i < board->max_well_letters; ++i) {
-        letters_draw(&_letters, board->well[i], Vector2{ well_position.x + letter_margin,well_position.y + i * space_size + letter_margin }, .25f);
+        if (board->well[i] >= 0)
+        {
+           letters_draw(&_letters, board->well[i], Vector2{ well_position.x + letter_margin,well_position.y + i * space_size + letter_margin }, .25f);
+        }
     }
+}
+
+static void input_update() {
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+        _current_action = Action::Drop;
+        TraceLog(LOG_INFO, "Mouse Released");
+    }
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        _current_action = Action::Pickup;
+        TraceLog(LOG_INFO, "Mouse Pressed");
+    }
+}
+
+static void drag_update(DragInfo* drag, Board* board) {
+    Vector2 mouse_pos = GetMousePosition();
+
+    if (_current_action == Action::Pickup) {
+        if (CheckCollisionPointRec(mouse_pos, _layout.well_rect)) {
+            int dist = mouse_pos.y - _layout.well_rect.y;
+            int index = dist / _layout.tile_size;
+            if (index < 0 || index > board->max_well_letters) {
+                TraceLog(LOG_WARNING, "Mouse pickup error, index wrong [%s], ", index);
+                return;
+            }
+            drag->is_dragging = true;
+            drag->letter = board->well[index];
+            drag->original_index = index;
+            board->well[index] = -1;
+            drag->position = mouse_pos;
+        }
+    }
+    else if (_current_action == Action::Drop) {
+        bool drop_success = false;
+        if (CheckCollisionPointRec(mouse_pos, _layout.board_rect)) {
+            Vector2 dist = Vector2Scale(
+                Vector2Subtract(mouse_pos, _layout.board_pos), 1.0f/(float)_layout.tile_size);
+            int x = (int)dist.x;
+            int y = (int)dist.y;
+            char letter = board_get_letter(board, x, y);
+            if (letter == -1) {
+                drop_success = true;
+                board_set_letter(board, x, y, drag->letter);
+            }
+        }
+
+        if (drop_success == true) {
+            // TODO add random letter to well
+        }
+        else {
+            board->well[drag->original_index] = drag->letter;
+        }
+
+        drag->is_dragging = false;
+    }
+
+    if (drag->is_dragging) {
+        drag->position = mouse_pos;
+    }
+
+    _current_action = Action::None;
 }
 
 //----------------------------------------------------------------------------------
@@ -181,15 +288,33 @@ void init_game_screen(void)
     letters_init(&_letters, "resources/solid_spritesheet.png");
     board_init(&_board, "resources/tile_space.png", 5, 5);
 
+    float tile_size = _board.texture_space.width * 0.25f; // Assumes square
+
+    _layout.board_rect = Rectangle{
+        .x = 20, .y = 20,
+        .width = tile_size * _board.columns,
+        .height = tile_size * _board.rows
+    };
+    _layout.board_pos = Vector2{ _layout.board_rect.x, _layout.board_rect.y };
+
+    _layout.well_rect = Rectangle{
+        .x = 400, .y = 20,
+        .width = tile_size,
+        .height = tile_size * _board.max_well_letters
+    };
+    _layout.well_pos = Vector2{ _layout.well_rect.x, _layout.well_rect.y };
+    _layout.tile_size = tile_size ;
 }
 
 // Gameplay Screen Update logic
 void update_game_screen(void)
 {    // Press enter or tap to change to ENDING screen
-    if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
-    {
-        _finish_screen = 1;
-    }
+    //if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
+    //{
+    //    _finish_screen = 1;
+    //}
+    input_update();
+    drag_update(&_drag_info, &_board);
 }
 
 // Gameplay Screen Draw logic
@@ -205,7 +330,10 @@ void draw_game_screen(void)
     // TODO: Draw GAMEPLAY screen here!
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
 
-    board_draw(&_board, Vector2(20, 20), Vector2(400, 20));
+    board_draw(&_board, _layout.board_pos, _layout.well_pos);
+    if (_drag_info.is_dragging) {
+        letters_draw(&_letters, _drag_info.letter, _drag_info.position, 0.25f);
+    }
 }
 
 // Gameplay Screen Unload logic
