@@ -131,12 +131,6 @@ static void letters_init(Letters *letters, const char* filename) {
     }
 }
 
-
-static int random_letter()
-{
-    return GetRandomValue('A', 'Z');
-}
-
 static void letters_unload(Letters* letters) {
     UnloadTexture(letters->texture);
     letters->texture = { 0 };
@@ -168,7 +162,7 @@ static void board_init(Board* board, const char* filename, int rows, int cols) {
     }
 
     for (int i = 0; i < board->max_well_letters; ++i) {
-        board->well[i] = random_letter();
+        board->well[i] = dictionary_get_random_letter(&_dictionary);
     }
 }
 
@@ -227,7 +221,7 @@ static void board_reset(Board* board) {
 static void board_reset_well(Board* board) {
     static int test[] = { 'L', 'O', 'O', 'K', 'S' };
     for (int i = 0; i < board->max_well_letters; ++i) {
-        board->well[i] = test[i];
+        board->well[i] = dictionary_get_random_letter(&_dictionary);
     }
 }
 
@@ -311,20 +305,15 @@ static void drag_update(DragInfo* drag, Board* board) {
             int y = (int)dist.y;
             char letter = board_get_letter(board, x, y);
             if (letter == -1) {
-                drop_success = true;
                 board_set_letter(board, x, y, drag->letter);
-                board->well[drag->original_index] = random_letter();
-
+                board->well[drag->original_index] = dictionary_get_random_letter(&_dictionary);
                 CheckResult result = board_check_words(board, &_dictionary, x, y);
                 board_clear_words(board, x, y, result);
             }
-        }
-
-        if (drop_success == true) {
-            // TODO add random letter to well
-        }
-        else {
-            board->well[drag->original_index] = drag->letter;
+            else {
+                // Return letter to well
+                board->well[drag->original_index] = drag->letter;
+            }
         }
 
         drag->is_dragging = false;
@@ -348,6 +337,9 @@ void init_game_screen(void)
     _frames_counter = 0;
     _finish_screen = 0;
 
+    _dictionary = dictionary_load("resources/text/en/words.txt");
+    dictionary_load_distribution(&_dictionary, "resources/text/en/distribution.txt");
+
     letters_init(&_letters, "resources/solid_spritesheet.png");
     board_init(&_board, "resources/tile_space.png", 5, 5);
 
@@ -367,8 +359,6 @@ void init_game_screen(void)
     };
     _layout.well_pos = Vector2{ _layout.well_rect.x, _layout.well_rect.y };
     _layout.tile_size = tile_size;
-
-    _dictionary = dictionary_load("resources/text/en/words.txt");
 }
 
 // Gameplay Screen Update logic
