@@ -49,13 +49,20 @@ enum CheckResult {
     CHECK_RESULT_BOTH = CHECK_RESULT_HORIZONTAL | CHECK_RESULT_VERTICAL,
 };
 
+enum Specials {
+    SPECIAL_CLEAR_COLUMN,
+    SPECIAL_CLEAR_ROW,
+    SPECIAL_CLEAR_TILE,
+    SPECIAL_COUNT
+};
+
 Action _current_action = Action::None;
 
 struct Letters {
-    // ASCII only for now
     static const int count = 27;
     Texture2D texture;
     Rectangle rectangles[count] = { 0 };
+    Rectangle specials[SPECIAL_COUNT] = { 0 };
     float scale;
 };
 
@@ -122,12 +129,23 @@ static void letters_init(Letters *letters, const char* filename) {
                 .width = (float)letter_width,
                 .height = (float)letter_height,
             };
-            int index = letter_order[row * col_count + col] - 97 + 1;
+            int index = letter_order[row * col_count + col] - 'A';
             // Space will be less than 1, skip the last rect
-            if (letter_order[row * col_count + col] == ' ') index = 0;
+            // if (letter_order[row * col_count + col] == ' ') index = 0;
 
             if (index < letters->count) letters->rectangles[index] = rect;
         }
+    }
+
+    // Init special tiles
+    for (int i = 0; i < SPECIAL_COUNT; ++i) {
+        Rectangle rect = {
+            .x = (float)(4 * (letter_width + col_gap)),
+            .y = (float)(i * (letter_height + row_gap)),
+            .width = (float)letter_width,
+            .height = (float)letter_height,
+        };
+        letters->specials[i] = rect;
     }
 }
 
@@ -138,14 +156,32 @@ static void letters_unload(Letters* letters) {
 
 static void letters_draw(Letters* letters, int c, Vector2 pos, float scale)
 {
-    int index = c - 96;
+    Rectangle source;
+
+    if (c < SPECIAL_COUNT) {
+        source = letters->specials[c];
+    }
+    else {
+        //TraceLog(LOG_INFO, "%i", c - 'A');
+        source = letters->rectangles[c - 'A'];
+    };
+
     Rectangle target = {
         .x = pos.x,
         .y = pos.y,
         .width = (float)216 * scale, // Measure interior space of tile that is being used
         .height = (float)216 * scale,
     };
-    DrawTexturePro(letters->texture, letters->rectangles[index], target, Vector2 { 0, 0 }, 0, WHITE);
+    DrawTexturePro(letters->texture, source, target, Vector2 { 0, 0 }, 0, WHITE);
+}
+
+static int dictionary_get_letter_or_special(Dictionary* dict) {
+    if (GetRandomValue(0, 24) < 1) {
+        return GetRandomValue(0, 2);
+    }
+    else {
+        return dictionary_get_random_letter(dict);
+    }
 }
 
 static void board_init(Board* board, const char* filename, int rows, int cols) {
@@ -199,6 +235,8 @@ static CheckResult board_check_words(Board* board, Dictionary* dict, int x, int 
     return result;
 }
 
+
+
 static void board_clear_words(Board* board, int x, int y, CheckResult where) {
     if ((where & CHECK_RESULT_HORIZONTAL) != 0) {
         for (int i = 0; i < board->columns; ++i) {
@@ -212,6 +250,22 @@ static void board_clear_words(Board* board, int x, int y, CheckResult where) {
     }
 }
 
+void board_drop_tile(Board* board, int x, int y, int letter) {
+    switch (letter) {
+    case SPECIAL_CLEAR_TILE:
+        board_set_letter(board, x, y, -1);
+        break;
+    case SPECIAL_CLEAR_ROW:
+        board_clear_words(board, x, y, CHECK_RESULT_HORIZONTAL);
+        break;
+    case SPECIAL_CLEAR_COLUMN:
+        board_clear_words(board, x, y, CHECK_RESULT_VERTICAL);
+        break;
+    default:
+        board_set_letter(board, x, y, letter);
+    }
+}
+
 static void board_reset(Board* board) {
     for (int i = 0; i < 32; ++i) {
         board->letters[i] = -1;
@@ -219,10 +273,10 @@ static void board_reset(Board* board) {
 }
 
 static void board_reset_well(Board* board) {
-    static int test[] = { 'L', 'O', 'O', 'K', 'S' };
     for (int i = 0; i < board->max_well_letters; ++i) {
-        board->well[i] = dictionary_get_random_letter(&_dictionary);
+        board->well[i] = dictionary_get_letter_or_special(&_dictionary);
     }
+
 }
 
 static void board_unload(Board* board) {
@@ -304,9 +358,9 @@ static void drag_update(DragInfo* drag, Board* board) {
             int x = (int)dist.x;
             int y = (int)dist.y;
             char letter = board_get_letter(board, x, y);
-            if (letter == -1) {
-                board_set_letter(board, x, y, drag->letter);
-                board->well[drag->original_index] = dictionary_get_random_letter(&_dictionary);
+            if (letter == -1 || drag->letter < SPECIAL_COUNT) {
+                board_drop_tile(board, x, y, drag->letter);
+                board->well[drag->original_index] = dictionary_get_letter_or_special(&_dictionary);
                 CheckResult result = board_check_words(board, &_dictionary, x, y);
                 board_clear_words(board, x, y, result);
             }

@@ -128,10 +128,10 @@ void dictionary_load_distribution(Dictionary* dict, const char* filename) {
 int dictionary_get_random_letter(Dictionary* dict) 
 {
     int draw = GetRandomValue(0, dict->distribution_sum - 1);
-    int index = 0;
+    int index = -2;
     while (draw > 0 && index < dict->distribution_count) {
-        draw -= dict->distribution[index + 1];
         index += 2;
+        draw -= dict->distribution[index + 1];
     }
 
     return dict->distribution[index];
