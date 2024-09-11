@@ -25,10 +25,8 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include "screens.h"
-
-#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+#include "screens.h"
 
 #include "dictionary.h"
 
@@ -42,6 +40,13 @@ enum class Action {
     None,
     Pickup,
     Drop,
+};
+
+enum CheckResult {
+    CHECK_RESULT_NONE = 0x0,
+    CHECK_RESULT_HORIZONTAL = 0x1,
+    CHECK_RESULT_VERTICAL = 0x1 << 1,
+    CHECK_RESULT_BOTH = CHECK_RESULT_HORIZONTAL | CHECK_RESULT_VERTICAL,
 };
 
 Action _current_action = Action::None;
@@ -100,13 +105,13 @@ static void letters_init(Letters *letters, const char* filename) {
     int col_count = 4;
     int col_gap = 2;
     const char letter_order[27] = { 
-        'y', 'r', 'k', 'd',
-        'x', 'q', 'j', 'c',
-        'w', 'p', 'i', 'b',
-        'v', 'o', 'h', 'a',
-        'u', 'n', 'g', ' ',
-        't', 'm', 'f', 'l',
-        's', 'z', 'e'
+        'Y', 'R', 'K', 'D',
+        'X', 'Q', 'J', 'C',
+        'W', 'P', 'I', 'B',
+        'V', 'O', 'H', 'A',
+        'U', 'N', 'G', ' ',
+        'T', 'M', 'F', 'L',
+        'S', 'Z', 'E'
     };
     letters->texture = LoadTexture(filename);
     for (int row = 0; row < row_count; ++row) {
@@ -129,7 +134,7 @@ static void letters_init(Letters *letters, const char* filename) {
 
 static int random_letter()
 {
-    return GetRandomValue('a', 'z');
+    return GetRandomValue('A', 'Z');
 }
 
 static void letters_unload(Letters* letters) {
@@ -167,7 +172,7 @@ static void board_init(Board* board, const char* filename, int rows, int cols) {
     }
 }
 
-static char board_get_letter(Board* board, int x, int y) {
+static int board_get_letter(Board* board, int x, int y) {
     if (x < 0 || x >= board->columns || y < 0 || y >= board->rows) {
         TraceLog(LOG_FATAL, "Invalid access to board (%i,%i)", x, y);
         return -1;
@@ -175,7 +180,7 @@ static char board_get_letter(Board* board, int x, int y) {
     return board->letters[x * board->rows + y];
 }
 
-static void board_set_letter(Board* board, int x, int y, char c) {
+static void board_set_letter(Board* board, int x, int y, int c) {
     if (x < 0 || x >= board->columns || y < 0 || y >= board->rows) {
         TraceLog(LOG_FATAL, "Invalid access to board (%i,%i)", x, y);
         return;
@@ -183,9 +188,46 @@ static void board_set_letter(Board* board, int x, int y, char c) {
     board->letters[x * board->rows + y] = c;
 }
 
+static CheckResult board_check_words(Board* board, Dictionary* dict, int x, int y) {
+    // Check horizontal
+    // Check vertical 
+    int word[6] = { 0 };
+    for (int i = 0; i < board->columns; ++i) {
+        word[i] = board_get_letter(board, i, y);
+    }
+    CheckResult result = dictionary_exists(dict, word, 6) ? CHECK_RESULT_HORIZONTAL : CHECK_RESULT_NONE;
+
+    for (int i = 0; i < board->rows; ++i) {
+        word[i] = board_get_letter(board, x, i);
+    }
+
+    result = (CheckResult)(result | (dictionary_exists(dict, word, 6) ? CHECK_RESULT_VERTICAL : CHECK_RESULT_NONE));
+    return result;
+}
+
+static void board_clear_words(Board* board, int x, int y, CheckResult where) {
+    if ((where & CHECK_RESULT_HORIZONTAL) != 0) {
+        for (int i = 0; i < board->columns; ++i) {
+            board_set_letter(board, i, y, -1);
+        }
+    }
+    if ((where & CHECK_RESULT_VERTICAL) != 0) {
+        for (int i = 0; i < board->rows; ++i) {
+            board_set_letter(board, x, i, -1);
+        }
+    }
+}
+
 static void board_reset(Board* board) {
     for (int i = 0; i < 32; ++i) {
         board->letters[i] = -1;
+    }
+}
+
+static void board_reset_well(Board* board) {
+    static int test[] = { 'L', 'O', 'O', 'K', 'S' };
+    for (int i = 0; i < board->max_well_letters; ++i) {
+        board->well[i] = test[i];
     }
 }
 
@@ -233,14 +275,12 @@ static void board_draw(Board* board, Vector2 board_position, Vector2 well_positi
     }
 }
 
-static void input_update() {
-    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+static void input_update(DragInfo* dragging) {
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && dragging->is_dragging) {
         _current_action = Action::Drop;
-        TraceLog(LOG_INFO, "Mouse Released");
     }
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !dragging->is_dragging) {
         _current_action = Action::Pickup;
-        TraceLog(LOG_INFO, "Mouse Pressed");
     }
 }
 
@@ -275,8 +315,8 @@ static void drag_update(DragInfo* drag, Board* board) {
                 board_set_letter(board, x, y, drag->letter);
                 board->well[drag->original_index] = random_letter();
 
-                // Check Word horizontal, CheckWord vertical
-                // Remove if match
+                CheckResult result = board_check_words(board, &_dictionary, x, y);
+                board_clear_words(board, x, y, result);
             }
         }
 
@@ -338,21 +378,13 @@ void update_game_screen(void)
     //{
     //    _finish_screen = 1;
     //}
-    input_update();
+    input_update(&_drag_info);
     drag_update(&_drag_info, &_board);
 }
 
 // Gameplay Screen Draw logic
 void draw_game_screen(void)
 {
-    static float time = 1.0;
-    static char c = 'a';
-    time -= GetFrameTime();
-    if (time < 0) {
-        time = 1.0;
-        ++c;
-    }
-    // TODO: Draw GAMEPLAY screen here!
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
 
     board_draw(&_board, _layout.board_pos, _layout.well_pos);
@@ -364,6 +396,10 @@ void draw_game_screen(void)
         board_reset(&_board);
     }
 
+    if (GuiButton(Rectangle{ .x = 500, .y = 80, .width = 100, .height = 40 }, "Reset Well")) {
+        board_reset_well(&_board);
+    }
+
 }
 
 // Gameplay Screen Unload logic
@@ -371,6 +407,7 @@ void unload_game_screen(void)
 {
     letters_unload(&_letters);
     board_unload(&_board);
+    dictionary_unload(&_dictionary);
 }
 
 // Gameplay Screen should finish?

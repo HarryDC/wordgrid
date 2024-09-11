@@ -19,7 +19,7 @@ FetchContent_Declare(
     raygui
     DOWNLOAD_EXTRACT_TIMESTAMP OFF
     GIT_REPOSITORY https://github.com/raysan5/raygui.git
-	SOURCE_SUBDIR projects/CMake
+    SOURCE_SUBDIR projects/CMake
     FIND_PACKAGE_ARGS
 )
 
@@ -29,10 +29,11 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS
 )
 
-FetchContent_MakeAvailable(raylib unity)
-FetchContent_MakeAvailable(raygui )
+FetchContent_MakeAvailable(raylib raygui unity)
 
 add_subdirectory(src)
-add_subdirectory(test)
 
+if (NOT "${PLATFORM}" STREQUAL "Web")
+    add_subdirectory(test)
+endif()
 

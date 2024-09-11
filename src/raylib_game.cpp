@@ -13,7 +13,14 @@
 ********************************************************************************************/
 
 #include "raylib.h"
+
+// Lets us include raygui from other places without issues
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+#undef RAYGUI_IMPLEMENTATION
+
 #include "screens.h"    // NOTE: Declares global (extern) variables and screens functions
+
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
