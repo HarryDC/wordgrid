@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-enum class Mode {
+enum class LinebreakMode {
     CR,
     CRLF,
     LF
@@ -14,7 +14,7 @@ struct Dictionary {
     int *words = nullptr; // 0 separated "strings" of codepoints for the words
     int words_size = 0;
     int word_count = 0;
-    Mode mode = Mode::CRLF;
+    LinebreakMode mode = LinebreakMode::CRLF;
     int* distribution = nullptr;
     int distribution_count = 0;
     int distribution_sum = 0;
@@ -39,10 +39,10 @@ Dictionary dictionary_load(const char* filename)
     }
 
     int skip_crlf = 1;
-    result.mode = (data[i] == CR) ? Mode::CR : Mode::LF;
+    result.mode = (data[i] == CR) ? LinebreakMode::CR : LinebreakMode::LF;
     if (data[i + 1] == LF) {
         skip_crlf = 2;
-        result.mode = Mode::CRLF;
+        result.mode = LinebreakMode::CRLF;
     }
 
     int codepoint_count = -1;

@@ -72,8 +72,8 @@ int main(void)
     font = LoadFont("resources/mecha.png");
 
     // Setup and init first screen
-    currentScreen = GAMEPLAY;
-    init_game_screen();
+    currentScreen = TITLE;
+    InitTitleScreen();
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);

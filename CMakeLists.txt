@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(WordBingoAllBuild)
+project(WordGrid)
 include(FetchContent)
 
 # Generate compile_commands.json
@@ -11,7 +11,7 @@ set(RAYLIB_VERSION 5.0)
 FetchContent_Declare(
     raylib
     DOWNLOAD_EXTRACT_TIMESTAMP OFF
-    URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+    URL https://github.com/raysan5/raylib/archive/ed702673ea0ff49da2ca494686814376ad040941.zip # 9/12/2024
     FIND_PACKAGE_ARGS
 )
 

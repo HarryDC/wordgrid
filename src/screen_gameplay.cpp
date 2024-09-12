@@ -29,6 +29,7 @@
 #include "screens.h"
 
 #include "dictionary.h"
+#include "mode_timeattack.h"
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -56,6 +57,17 @@ enum Specials {
     SPECIAL_COUNT
 };
 
+enum GameMode {
+    MODE_TIMEATTACK,
+    MODE_COUNT,
+};
+
+using GameModeCall = void(*)();
+
+GameModeCall mode_init_calls[MODE_COUNT] = { mode_timeattack_init };
+GameModeCall mode_update_calls[MODE_COUNT] = { mode_timeattack_update };
+GameModeCall mode_draw_calls[MODE_COUNT] = { mode_timeattack_draw };
+ 
 Action _current_action = Action::None;
 
 struct Letters {
@@ -103,6 +115,14 @@ struct DragInfo {
 static DragInfo _drag_info;
 
 static Dictionary _dictionary;
+
+struct Game {
+    GameMode mode;
+    int word_count = 0;
+    int trash_count = 0;
+};
+
+Game _game;
 
 static void letters_init(Letters *letters, const char* filename) {
     int letter_width = 256;
@@ -413,6 +433,9 @@ void init_game_screen(void)
     };
     _layout.well_pos = Vector2{ _layout.well_rect.x, _layout.well_rect.y };
     _layout.tile_size = tile_size;
+
+    // Init the game mode
+    mode_init_calls[_game.mode]();
 }
 
 // Gameplay Screen Update logic
@@ -424,6 +447,7 @@ void update_game_screen(void)
     //}
     input_update(&_drag_info);
     drag_update(&_drag_info, &_board);
+    mode_update_calls[_game.mode]();
 }
 
 // Gameplay Screen Draw logic
@@ -444,6 +468,7 @@ void draw_game_screen(void)
         board_reset_well(&_board);
     }
 
+    mode_draw_calls[_game.mode]();
 }
 
 // Gameplay Screen Unload logic

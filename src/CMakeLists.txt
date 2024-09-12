@@ -1,5 +1,3 @@
-project(WordBingo)
-
 # Our Project
 add_executable(${PROJECT_NAME})
 
