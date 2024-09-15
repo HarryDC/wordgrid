@@ -57,16 +57,13 @@ enum Specials {
     SPECIAL_COUNT
 };
 
-enum GameMode {
-    MODE_TIMEATTACK,
-    MODE_COUNT,
-};
-
 using GameModeCall = void(*)();
+using GameModeUpdateCall = bool(*)(Game*);
+using GameModeDrawCall = void(*)(Game*);
 
 GameModeCall mode_init_calls[MODE_COUNT] = { mode_timeattack_init };
-GameModeCall mode_update_calls[MODE_COUNT] = { mode_timeattack_update };
-GameModeCall mode_draw_calls[MODE_COUNT] = { mode_timeattack_draw };
+GameModeUpdateCall mode_update_calls[MODE_COUNT] = { mode_timeattack_update };
+GameModeDrawCall mode_draw_calls[MODE_COUNT] = { mode_timeattack_draw };
  
 Action _current_action = Action::None;
 
@@ -116,13 +113,7 @@ static DragInfo _drag_info;
 
 static Dictionary _dictionary;
 
-struct Game {
-    GameMode mode;
-    int word_count = 0;
-    int trash_count = 0;
-};
-
-Game _game;
+static Game _game;
 
 static void letters_init(Letters *letters, const char* filename) {
     int letter_width = 256;
@@ -383,11 +374,18 @@ static void drag_update(DragInfo* drag, Board* board) {
                 board->well[drag->original_index] = dictionary_get_letter_or_special(&_dictionary);
                 CheckResult result = board_check_words(board, &_dictionary, x, y);
                 board_clear_words(board, x, y, result);
+                if (result == CHECK_RESULT_BOTH) {
+                    _game.word_count += 2;
+                }
+                else if (result != CHECK_RESULT_NONE) {
+                    _game.word_count += 1;
+                }
+                drop_success = true;
             }
-            else {
-                // Return letter to well
-                board->well[drag->original_index] = drag->letter;
-            }
+        }
+
+        if (!drop_success == true) {
+            board->well[drag->original_index] = drag->letter;
         }
 
         drag->is_dragging = false;
@@ -447,7 +445,7 @@ void update_game_screen(void)
     //}
     input_update(&_drag_info);
     drag_update(&_drag_info, &_board);
-    mode_update_calls[_game.mode]();
+    mode_update_calls[_game.mode](&_game);
 }
 
 // Gameplay Screen Draw logic
@@ -460,15 +458,15 @@ void draw_game_screen(void)
         letters_draw(&_letters, _drag_info.letter, _drag_info.position, 0.25f);
     }
 
-    if (GuiButton(Rectangle{ .x = 500, .y = 20, .width = 100, .height = 40 }, "Reset Board")) {
+    if (GuiButton(Rectangle{ .x = 500, .y = 300, .width = 100, .height = 40 }, "Reset Board")) {
         board_reset(&_board);
     }
 
-    if (GuiButton(Rectangle{ .x = 500, .y = 80, .width = 100, .height = 40 }, "Reset Well")) {
+    if (GuiButton(Rectangle{ .x = 620, .y = 300, .width = 100, .height = 40 }, "Reset Well")) {
         board_reset_well(&_board);
     }
 
-    mode_draw_calls[_game.mode]();
+    mode_draw_calls[_game.mode](&_game);
 }
 
 // Gameplay Screen Unload logic

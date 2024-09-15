@@ -90,4 +90,15 @@ int FinishEndingScreen(void);
 }
 #endif
 
+enum GameMode {
+    MODE_TIMEATTACK,
+    MODE_COUNT,
+};
+
+struct Game {
+    GameMode mode;
+    int word_count = 0;
+    int trash_count = 0;
+};
+
 #endif // SCREENS_H
