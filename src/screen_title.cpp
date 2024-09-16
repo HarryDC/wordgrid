@@ -24,6 +24,7 @@
 **********************************************************************************************/
 
 #include "raylib.h"
+#include "raygui.h"
 #include "screens.h"
 
 //----------------------------------------------------------------------------------
@@ -37,15 +38,25 @@ static int _finish_screen = 0;
 //----------------------------------------------------------------------------------
 
 // Title Screen Initialization logic
-void InitTitleScreen(void)
+void init_title_screen(void)
 {
     // TODO: Initialize TITLE screen variables here!
     _frames_counter = 0;
     _finish_screen = 0;
 }
 
+enum AnchorType {
+    ANCHOR_NONE,
+    ANCHOR_CENTER_H = 0x1,
+    ANCHOR_CENTER_V = 0x1 << 1,
+    ANCHOR_TOP = 0x1 << 2,
+    ANCHOR_BOTTOM = 0x1 << 3,
+    ANCHOR_LEFT = 0x1 << 4,
+    ANCHOR_RIGHT = 0x1 << 5
+};
+
 // Title Screen Update logic
-void UpdateTitleScreen(void)
+void update_title_screen(void)
 {
     // TODO: Update TITLE screen variables here!
 
@@ -58,23 +69,35 @@ void UpdateTitleScreen(void)
 }
 
 // Title Screen Draw logic
-void DrawTitleScreen(void)
+void draw_title_screen(void)
 {
     // TODO: Draw TITLE screen here!
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), GREEN);
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), GRAY);
     Vector2 pos = { 20, 10 };
-    DrawTextEx(font, "TITLE SCREEN", pos, font.baseSize*3.0f, 4, DARKGREEN);
-    DrawText("PRESS ENTER or TAP to JUMP to GAMEPLAY SCREEN", 120, 220, 20, DARKGREEN);
+    DrawTextEx(g_font_small, "WORD GRID", pos, g_font_small.baseSize*3.0f, 4, DARKGREEN);
+
+    float y = GetScreenHeight() / 3.0f;
+    float x = GetScreenWidth() / 2.0 - 100.0;
+
+    if (GuiButton(Rectangle{ .x = x, .y = y, .width = 200, .height = 60 }, "Time Attack")) 
+    {
+        g_game_settings.mode = MODE_TIMEATTACK;
+        _finish_screen = 2;
+    };
+    if (GuiButton(Rectangle{ .x = x, .y = y + 100, .width = 200, .height = 60 }, "Count Attack")) 
+    {
+        ///
+    };
 }
 
 // Title Screen Unload logic
-void UnloadTitleScreen(void)
+void unload_title_screen(void)
 {
     // TODO: Unload TITLE screen variables here!
 }
 
 // Title Screen should finish?
-int FinishTitleScreen(void)
+int finish_title_screen(void)
 {
     return _finish_screen;
 }

@@ -433,7 +433,7 @@ void init_game_screen(void)
     _layout.tile_size = tile_size;
 
     // Init the game mode
-    mode_init_calls[_game.mode]();
+    mode_init_calls[g_game_settings.mode]();
 }
 
 // Gameplay Screen Update logic
@@ -445,7 +445,7 @@ void update_game_screen(void)
     //}
     input_update(&_drag_info);
     drag_update(&_drag_info, &_board);
-    mode_update_calls[_game.mode](&_game);
+    mode_update_calls[g_game_settings.mode](&_game);
 }
 
 // Gameplay Screen Draw logic
@@ -466,7 +466,7 @@ void draw_game_screen(void)
         board_reset_well(&_board);
     }
 
-    mode_draw_calls[_game.mode](&_game);
+    mode_draw_calls[g_game_settings.mode](&_game);
 }
 
 // Gameplay Screen Unload logic

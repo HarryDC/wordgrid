@@ -30,8 +30,9 @@
 // Shared Variables Definition (global)
 // NOTE: Those variables are shared between modules through screens.h
 //----------------------------------------------------------------------------------
-GameScreen currentScreen = LOGO;
-Font font = { 0 };
+GameScreen g_currentScreen = LOGO;
+Font g_font_small = { 0 };
+GameSettings g_game_settings;
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -69,11 +70,14 @@ int main(void)
     InitAudioDevice();      // Initialize audio device
 
     // Load global data (assets that must be available in all screens, i.e. font)
-    font = LoadFont("resources/mecha.png");
+    g_font_small = LoadFont("resources/fredoka_medium.ttf");
+    GuiSetFont(g_font_small);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
+    
 
     // Setup and init first screen
-    currentScreen = TITLE;
-    InitTitleScreen();
+    g_currentScreen = TITLE;
+    init_title_screen();
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -91,17 +95,17 @@ int main(void)
     // De-Initialization
     //--------------------------------------------------------------------------------------
     // Unload current screen data before closing
-    switch (currentScreen)
+    switch (g_currentScreen)
     {
         case LOGO: UnloadLogoScreen(); break;
-        case TITLE: UnloadTitleScreen(); break;
+        case TITLE: unload_title_screen(); break;
         case GAMEPLAY: unload_game_screen(); break;
         case ENDING: UnloadEndingScreen(); break;
         default: break;
     }
 
     // Unload global data loaded
-    UnloadFont(font);
+    UnloadFont(g_font_small);
 
     CloseAudioDevice();     // Close audio context
 
@@ -118,10 +122,10 @@ int main(void)
 static void ChangeToScreen(GameScreen screen)
 {
     // Unload current screen
-    switch (currentScreen)
+    switch (g_currentScreen)
     {
         case LOGO: UnloadLogoScreen(); break;
-        case TITLE: UnloadTitleScreen(); break;
+        case TITLE: unload_title_screen(); break;
         case GAMEPLAY: unload_game_screen(); break;
         case ENDING: UnloadEndingScreen(); break;
         default: break;
@@ -131,13 +135,13 @@ static void ChangeToScreen(GameScreen screen)
     switch (screen)
     {
         case LOGO: InitLogoScreen(); break;
-        case TITLE: InitTitleScreen(); break;
+        case TITLE: init_title_screen(); break;
         case GAMEPLAY: init_game_screen(); break;
         case ENDING: InitEndingScreen(); break;
         default: break;
     }
 
-    currentScreen = screen;
+    g_currentScreen = screen;
 }
 
 // Request transition to next screen
@@ -145,7 +149,7 @@ static void TransitionToScreen(GameScreen screen)
 {
     onTransition = true;
     transFadeOut = false;
-    transFromScreen = currentScreen;
+    transFromScreen = g_currentScreen;
     transToScreen = screen;
     transAlpha = 0.0f;
 }
@@ -167,7 +171,7 @@ static void UpdateTransition(void)
             switch (transFromScreen)
             {
                 case LOGO: UnloadLogoScreen(); break;
-                case TITLE: UnloadTitleScreen(); break;
+                case TITLE: unload_title_screen(); break;
                 case OPTIONS: UnloadOptionsScreen(); break;
                 case GAMEPLAY: unload_game_screen(); break;
                 case ENDING: UnloadEndingScreen(); break;
@@ -178,13 +182,13 @@ static void UpdateTransition(void)
             switch (transToScreen)
             {
                 case LOGO: InitLogoScreen(); break;
-                case TITLE: InitTitleScreen(); break;
+                case TITLE: init_title_screen(); break;
                 case GAMEPLAY: init_game_screen(); break;
                 case ENDING: InitEndingScreen(); break;
                 default: break;
             }
 
-            currentScreen = transToScreen;
+            g_currentScreen = transToScreen;
 
             // Activate fade out effect to next loaded screen
             transFadeOut = true;
@@ -220,7 +224,7 @@ static void UpdateDrawFrame(void)
 
     if (!onTransition)
     {
-        switch(currentScreen)
+        switch(g_currentScreen)
         {
             case LOGO:
             {
@@ -231,10 +235,10 @@ static void UpdateDrawFrame(void)
             } break;
             case TITLE:
             {
-                UpdateTitleScreen();
+                update_title_screen();
 
-                if (FinishTitleScreen() == 1) TransitionToScreen(OPTIONS);
-                else if (FinishTitleScreen() == 2) TransitionToScreen(GAMEPLAY);
+                if (finish_title_screen() == 1) TransitionToScreen(OPTIONS);
+                else if (finish_title_screen() == 2) TransitionToScreen(GAMEPLAY);
 
             } break;
             case OPTIONS:
@@ -271,10 +275,10 @@ static void UpdateDrawFrame(void)
 
         ClearBackground(RAYWHITE);
 
-        switch(currentScreen)
+        switch(g_currentScreen)
         {
             case LOGO: DrawLogoScreen(); break;
-            case TITLE: DrawTitleScreen(); break;
+            case TITLE: draw_title_screen(); break;
             case OPTIONS: DrawOptionsScreen(); break;
             case GAMEPLAY: draw_game_screen(); break;
             case ENDING: DrawEndingScreen(); break;
