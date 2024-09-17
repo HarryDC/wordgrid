@@ -32,6 +32,8 @@
 #include "mode_timeattack.h"
 #include "mode_moveattack.h"
 
+#include <stdio.h>
+
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
 //----------------------------------------------------------------------------------
@@ -289,7 +291,6 @@ static void board_reset_well(Board* board) {
     for (int i = 0; i < board->max_well_letters; ++i) {
         board->well[i] = dictionary_get_letter_or_special(&_dictionary);
     }
-
 }
 
 static void board_unload(Board* board) {
