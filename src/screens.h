@@ -48,7 +48,7 @@ typedef enum GameScreen { UNKNOWN = -1, LOGO = 0, TITLE, OPTIONS, GAMEPLAY, ENDI
 #define XANTHOUS = Color{253, 184, 51, 255};
 #define AZUL = Color{41, 110, 180, 255};
 #define BLEU = Color{23, 137, 252, 255};
-#define GRAY RAYWHITE
+#define MY_GRAY RAYWHITE
 
 //----------------------------------------------------------------------------------
 // Global Variables Declaration (shared by several modules)
@@ -58,6 +58,7 @@ extern Font g_font_small;
 
 enum GameMode {
     MODE_TIMEATTACK,
+    MODE_MOVEATTACK,
     MODE_COUNT,
 };
 
@@ -70,6 +71,7 @@ extern GameSettings g_game_settings;
 struct Game {
     int word_count = 0;
     int trash_count = 0;
+    int move_count = 0;
 };
 
 

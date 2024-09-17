@@ -30,6 +30,7 @@
 
 #include "dictionary.h"
 #include "mode_timeattack.h"
+#include "mode_moveattack.h"
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -61,9 +62,10 @@ using GameModeCall = void(*)();
 using GameModeUpdateCall = bool(*)(Game*);
 using GameModeDrawCall = void(*)(Game*);
 
-GameModeCall mode_init_calls[MODE_COUNT] = { mode_timeattack_init };
-GameModeUpdateCall mode_update_calls[MODE_COUNT] = { mode_timeattack_update };
-GameModeDrawCall mode_draw_calls[MODE_COUNT] = { mode_timeattack_draw };
+GameModeCall mode_init_calls[MODE_COUNT] = { mode_timeattack_init, mode_moveattack_init };
+GameModeUpdateCall mode_update_calls[MODE_COUNT] = { mode_timeattack_update, mode_moveattack_update };
+GameModeDrawCall mode_draw_calls[MODE_COUNT] = { mode_timeattack_draw, mode_moveattack_draw };
+GameModeCall mode_unload_calls[MODE_COUNT] = { mode_timeattack_unload, mode_moveattack_unload };
  
 Action _current_action = Action::None;
 
@@ -374,6 +376,7 @@ static void drag_update(DragInfo* drag, Board* board) {
                 board->well[drag->original_index] = dictionary_get_letter_or_special(&_dictionary);
                 CheckResult result = board_check_words(board, &_dictionary, x, y);
                 board_clear_words(board, x, y, result);
+                _game.move_count += 1;
                 if (result == CHECK_RESULT_BOTH) {
                     _game.word_count += 2;
                 }
@@ -438,14 +441,13 @@ void init_game_screen(void)
 
 // Gameplay Screen Update logic
 void update_game_screen(void)
-{    // Press enter or tap to change to ENDING screen
-    //if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP))
-    //{
-    //    _finish_screen = 1;
-    //}
+{
     input_update(&_drag_info);
     drag_update(&_drag_info, &_board);
-    mode_update_calls[g_game_settings.mode](&_game);
+    bool run_again = mode_update_calls[g_game_settings.mode](&_game);
+    if (!run_again) {
+        _finish_screen = 1;
+    }
 }
 
 // Gameplay Screen Draw logic

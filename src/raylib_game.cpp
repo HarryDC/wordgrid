@@ -20,7 +20,7 @@
 #undef RAYGUI_IMPLEMENTATION
 
 #include "screens.h"    // NOTE: Declares global (extern) variables and screens functions
-
+#include "raylib-extras.h"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -33,6 +33,7 @@
 GameScreen g_currentScreen = LOGO;
 Font g_font_small = { 0 };
 GameSettings g_game_settings;
+Font g_default_font = { 0 };
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -65,14 +66,16 @@ int main(void)
 {
     // Initialization
     //---------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "raylib game template");
+    InitWindow(screenWidth, screenHeight, "GridWords");
 
     InitAudioDevice();      // Initialize audio device
 
     // Load global data (assets that must be available in all screens, i.e. font)
-    g_font_small = LoadFont("resources/fredoka_medium.ttf");
+    g_font_small = LoadFontEx("resources/fredoka_medium.ttf",24, nullptr, 0);
+    g_default_font = g_font_small;
+
     GuiSetFont(g_font_small);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
     
 
     // Setup and init first screen

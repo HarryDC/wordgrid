@@ -86,7 +86,8 @@ void draw_title_screen(void)
     };
     if (GuiButton(Rectangle{ .x = x, .y = y + 100, .width = 200, .height = 60 }, "Count Attack")) 
     {
-        ///
+        g_game_settings.mode = MODE_MOVEATTACK;
+        _finish_screen = 2;
     };
 }
 
