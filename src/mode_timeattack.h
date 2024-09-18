@@ -5,7 +5,7 @@
 
 struct ModeTimeAttackParameters {
     float initial_time = 300;
-    float words_to_increase = 5;
+    int words_to_increase = 5;
     float time_increase = 30;
 };
 
@@ -41,7 +41,7 @@ static void mode_timeattack_draw(Game* game) {
 
     const char* text = TextFormat("%02d:%02d", minutes, seconds);
 
-    DrawTextEx(_clock_font, text, _mode_timeattack.layout.clock_pos, _clock_font.baseSize, 1.0f, BLACK);
+    DrawTextEx(_clock_font, text, _mode_timeattack.layout.clock_pos, (float)_clock_font.baseSize, 1.0f, BLACK);
 
     Vector2 pos = _mode_timeattack.layout.text_pos;
     text = TextFormat("Total Words: %d", game->word_count);

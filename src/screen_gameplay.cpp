@@ -33,6 +33,7 @@
 #include "mode_moveattack.h"
 
 #include <stdio.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -116,6 +117,11 @@ struct DragInfo {
 static DragInfo _drag_info;
 
 static Dictionary _dictionary;
+
+static char _help_text[] = "Form words by dragging tiles from the line of tiles into the grid, when a row or a column is "
+"filled the word is removed and you get a score. Words can be made from left to right or from "
+"top to bottom. There are three special tiles, you can activate them by dragging them onto the board";
+static bool _show_help = false;
 
 static Game _game;
 
@@ -443,6 +449,8 @@ void init_game_screen(void)
 // Gameplay Screen Update logic
 void update_game_screen(void)
 {
+    if (_show_help) return;
+
     input_update(&_drag_info);
     drag_update(&_drag_info, &_board);
     bool run_again = mode_update_calls[g_game_settings.mode](&_game);
@@ -456,20 +464,43 @@ void draw_game_screen(void)
 {
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
 
+    Rectangle button_rect = { .x = 500, .y = 300, .width = (float)GetScreenWidth() - 500 - 20,
+    .height = (float)g_font_small.baseSize + 8 };
+
     board_draw(&_board, _layout.board_pos, _layout.well_pos);
     if (_drag_info.is_dragging) {
         letters_draw(&_letters, _drag_info.letter, _drag_info.position, 0.25f);
     }
 
-    if (GuiButton(Rectangle{ .x = 500, .y = 300, .width = 100, .height = 40 }, "Reset Board")) {
-        board_reset(&_board);
-    }
+    //if (GuiButton(Rectangle{ .x = 500, .y = 300, .width = 100, .height = 40 }, "Reset Board")) {
+    //    board_reset(&_board);
+    //}
 
-    if (GuiButton(Rectangle{ .x = 620, .y = 300, .width = 100, .height = 40 }, "Reset Well")) {
+    if (GuiButton(button_rect, "Refresh")) {
         board_reset_well(&_board);
     }
 
+    button_rect.y += button_rect.height + 8;
+
+    if (GuiButton(button_rect, "Help")) {
+        _show_help = true;
+    }
+
     mode_draw_calls[g_game_settings.mode](&_game);
+
+    if (_show_help) {
+        GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_TOP);   // WARNING: Word-wrap does not work as expected in case of no-top alignment
+        GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, TEXT_WRAP_WORD);            // WARNING: If wrap mode enabled, text editing is not supported
+        Rectangle box = Rectangle{ .x = 40, .y = 40, .width = (float)GetScreenWidth() - 80, .height = (float)GetScreenHeight() - 200 };
+        GuiPanel(box, nullptr);
+        GuiTextBox(box , _help_text, strlen(_help_text), false);
+        GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, TEXT_WRAP_NONE);
+        GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_MIDDLE);
+
+        Rectangle button = Rectangle{ .x = (float)GetScreenWidth() / 2.0f - 40, .y = box.y + box.height + 8,
+        .width = 80, .height = 40 };
+        _show_help = !GuiButton(button, "Close");
+    }
 }
 
 // Gameplay Screen Unload logic

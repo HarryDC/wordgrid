@@ -4,9 +4,9 @@
 #include "screens.h"
 
 struct ModeMoveAttackParameters {
-    float initial_moves = 50;
-    float words_to_increase = 5;
-    float move_increase = 10;
+    int initial_moves = 50;
+    int words_to_increase = 5;
+    int move_increase = 10;
 };
 
 struct ModeMoveAttackLayout {
