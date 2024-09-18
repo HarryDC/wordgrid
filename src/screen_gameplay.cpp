@@ -105,6 +105,17 @@ struct Board {
     int well[max_well_letters] = { 0 };
 };
 
+typedef struct Animation {
+    int letter;
+    Vector2 start;
+    Vector2 end;
+    Vector2 current;
+    float current_time;
+    float total_time;
+} Animation;
+
+Animation _animation;
+
 static Board _board;
 
 struct DragInfo {
@@ -124,10 +135,17 @@ static char _help_text[] = "Form words by dragging tiles from the line of tiles 
 "'x' will remove one tile, '|' will remove a whole column and '-' will remove a row.\n\n There are two "
 "game modes, Time Attack and Move Attack, in Time Attack your play time is limited but can be extended "
 "by making words, in Move Attack your number of moves is limited but you can get more by making words.\n\n"
+"By pushing `Refresh` you can swap out the list of letters that is available to you but you can only do "
+"that as many times as indicated in the button\n\n"
 "Have Fun and Good Luck!";
 static bool _show_help = false;
 
 static Game _game;
+
+float ease_out_cubic(float t) {
+    float val = 1.0f - t;
+    return 1.f - val * val * val;
+}
 
 static void letters_init(Letters *letters, const char* filename) {
     int letter_width = 256;
@@ -225,6 +243,14 @@ static void board_init(Board* board, const char* filename, int rows, int cols) {
     for (int i = 0; i < board->max_well_letters; ++i) {
         board->well[i] = dictionary_get_random_letter(&_dictionary);
     }
+}
+
+static Vector2 board_get_well_position(Board* board, int index) {
+    // Copied from board_draw
+    const float space_size = (float)board->texture_space.width * board->space_scale;
+    const int letter_margin = 8; // From image full scale is 32, we're using quarter size => 8
+    const float board_scale = .25;
+    return Vector2{ .x = _layout.well_pos.x + letter_margin, .y = _layout.well_pos.y + index * space_size + letter_margin };
 }
 
 static int board_get_letter(Board* board, int x, int y) {
@@ -398,8 +424,12 @@ static void drag_update(DragInfo* drag, Board* board) {
             }
         }
 
-        if (!drop_success == true) {
-            board->well[drag->original_index] = drag->letter;
+        if (drop_success == false) {
+            _animation.letter = drag->letter;
+            _animation.current_time = 0;
+            _animation.total_time = .5f;
+            _animation.start = drag->position;
+            _animation.end = board_get_well_position(board, drag->original_index);
         }
 
         drag->is_dragging = false;
@@ -410,6 +440,19 @@ static void drag_update(DragInfo* drag, Board* board) {
     }
 
     _current_action = Action::None;
+}
+
+bool animation_update(Animation* anim) {
+    
+    if (anim->letter < 0) return false;
+
+    anim->current_time += GetFrameTime();
+    if (anim->current_time > anim->total_time) {
+        return true;
+    }
+    float val = ease_out_cubic(anim->current_time / anim->total_time);
+    anim->current = Vector2Add(anim->start, Vector2Scale(Vector2Subtract(anim->end, anim->start), val));
+    return false;
 }
 
 //----------------------------------------------------------------------------------
@@ -459,6 +502,11 @@ void update_game_screen(void)
 
     input_update(&_drag_info);
     drag_update(&_drag_info, &_board);
+    if (animation_update(&_animation) == true) {
+        _board.well[_drag_info.original_index] = _animation.letter;
+        _animation.letter = -1;
+    }
+
     bool run_again = mode_update_calls[g_game_settings.mode](&_game);
     if (!run_again) {
         _finish_screen = 1;
@@ -476,6 +524,10 @@ void draw_game_screen(void)
     board_draw(&_board, _layout.board_pos, _layout.well_pos);
     if (_drag_info.is_dragging) {
         letters_draw(&_letters, _drag_info.letter, _drag_info.position, 0.25f);
+    }
+
+    if (_animation.letter > 0) {
+        letters_draw(&_letters, _animation.letter, _animation.current, 0.25f);
     }
 
     //if (GuiButton(Rectangle{ .x = 500, .y = 300, .width = 100, .height = 40 }, "Reset Board")) {
@@ -502,7 +554,7 @@ void draw_game_screen(void)
         GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_TOP);   // WARNING: Word-wrap does not work as expected in case of no-top alignment
         GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, TEXT_WRAP_WORD);            // WARNING: If wrap mode enabled, text editing is not supported
         Rectangle box = Rectangle{ .x = 40, .y = 40, 
-            .width = (float)GetScreenWidth() - 80, .height = (float)GetScreenHeight() - 160 };
+            .width = (float)GetScreenWidth() - 80, .height = (float)GetScreenHeight() - 120 };
         GuiPanel(box, nullptr);
         GuiTextBox(box , _help_text, strlen(_help_text), false);
         GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, TEXT_WRAP_NONE);
