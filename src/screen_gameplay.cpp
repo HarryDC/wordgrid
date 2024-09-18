@@ -120,7 +120,11 @@ static Dictionary _dictionary;
 
 static char _help_text[] = "Form words by dragging tiles from the line of tiles into the grid, when a row or a column is "
 "filled the word is removed and you get a score. Words can be made from left to right or from "
-"top to bottom. There are three special tiles, you can activate them by dragging them onto the board";
+"top to bottom.\n\nThere are three special tiles, you can activate them by dragging them onto the board "
+"'x' will remove one tile, '|' will remove a whole column and '-' will remove a row.\n\n There are two "
+"game modes, Time Attack and Move Attack, in Time Attack your play time is limited but can be extended "
+"by making words, in Move Attack your number of moves is limited but you can get more by making words.\n\n"
+"Have Fun and Good Luck!";
 static bool _show_help = false;
 
 static Game _game;
@@ -419,6 +423,8 @@ void init_game_screen(void)
     _frames_counter = 0;
     _finish_screen = 0;
 
+    _game.refresh_count = 3;
+
     _dictionary = dictionary_load("resources/text/en/words.txt");
     dictionary_load_distribution(&_dictionary, "resources/text/en/distribution.txt");
 
@@ -476,22 +482,27 @@ void draw_game_screen(void)
     //    board_reset(&_board);
     //}
 
-    if (GuiButton(button_rect, "Refresh")) {
+    if (_show_help || _game.refresh_count <= 0) GuiDisable();
+    if (GuiButton(button_rect, TextFormat("Refresh (%d)", _game.refresh_count))) {
+        --_game.refresh_count;
         board_reset_well(&_board);
     }
+    if (!_show_help) GuiEnable();
 
     button_rect.y += button_rect.height + 8;
 
     if (GuiButton(button_rect, "Help")) {
         _show_help = true;
     }
+    if (_show_help) GuiEnable();
 
     mode_draw_calls[g_game_settings.mode](&_game);
 
     if (_show_help) {
         GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_TOP);   // WARNING: Word-wrap does not work as expected in case of no-top alignment
         GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, TEXT_WRAP_WORD);            // WARNING: If wrap mode enabled, text editing is not supported
-        Rectangle box = Rectangle{ .x = 40, .y = 40, .width = (float)GetScreenWidth() - 80, .height = (float)GetScreenHeight() - 200 };
+        Rectangle box = Rectangle{ .x = 40, .y = 40, 
+            .width = (float)GetScreenWidth() - 80, .height = (float)GetScreenHeight() - 160 };
         GuiPanel(box, nullptr);
         GuiTextBox(box , _help_text, strlen(_help_text), false);
         GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, TEXT_WRAP_NONE);

@@ -72,6 +72,7 @@ struct Game {
     int word_count = 0;
     int trash_count = 0;
     int move_count = 0;
+    int refresh_count = 0;
 };
 
 
