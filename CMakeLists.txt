@@ -31,6 +31,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(raylib raygui unity)
 
+if ("${PLATFORM}" STREQUAL "Web")
+    add_link_options(-sALLOW_MEMORY_GROWTH)
+endif()
+
 add_subdirectory(src)
 
 if (NOT "${PLATFORM}" STREQUAL "Web")

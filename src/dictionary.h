@@ -45,6 +45,8 @@ Dictionary dictionary_load(const char* filename)
         result.mode = LinebreakMode::CRLF;
     }
 
+    TraceLog(LOG_INFO, "Linefeed Mode %d", static_cast<int>(result.mode));
+
     int codepoint_count = -1;
     int* words = LoadCodepoints(data, &codepoint_count);
 
@@ -62,7 +64,7 @@ Dictionary dictionary_load(const char* filename)
     for (int i = 0; i < codepoint_count + 1; ++i) {
         if (words[i] == CR || words[i] == LF || words[i] == 0) {
             result.word_count++;
-            words[i++] = 0;
+            words[i] = 0;
         }
     }
 
@@ -73,6 +75,17 @@ Dictionary dictionary_load(const char* filename)
     UnloadFileText(data);
 
     TraceLog(LOG_INFO, "Loaded %i words from file %s", result.word_count, filename);
+
+    int start = 0;
+    int end = 0;
+    for (int i = 0; i < 10; ++i) {
+        while (words[end] != 0) end++;
+        
+        TraceLog(LOG_DEBUG, "Word %d: [%c,%c,%c,%c,%c]", i, words[start], words[start+1], words[start+2], words[start+3], words[start+4]);
+        TraceLog(LOG_DEBUG, "Data %d: [%d,%d,%d,%d,%d]", i, words[start], words[start + 1], words[start + 2], words[start + 3], words[start + 4]);
+        start = end+1;
+        end = start;
+    }
     
     return result;
 }
@@ -153,11 +166,13 @@ bool dictionary_exists(Dictionary* dictionary, int* codepoints, int codepoint_co
             index++;
         }
         if (dictionary->words[index] == 0 && codepoints[search_index] == 0) {
+            TraceLog(LOG_DEBUG, "FOUND: [%c,%c,%c,%c,%c]", codepoints[0], codepoints[1], codepoints[2], codepoints[3], codepoints[4]);
             return true;
         }
         // Forward to next 0
         while (dictionary->words[index++] != 0) {}
     }
+    TraceLog(LOG_DEBUG, "Not Found: [%c,%c,%c,%c,%c]", codepoints[0], codepoints[1], codepoints[2], codepoints[3], codepoints[4]);
     return false;
 }
 

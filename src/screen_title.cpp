@@ -45,7 +45,7 @@ void init_title_screen(void)
     _frames_counter = 0;
     _finish_screen = 0;
 
-    g_game = Game{ 0 };
+    g_game = Game{};
 }
 
 enum AnchorType {
@@ -82,14 +82,14 @@ void draw_title_screen(void)
     DrawTextCenteredHorizontally(g_font_small, body_text, y, 1.0, BLACK);
 
     y = GetScreenHeight() / 2.0f;
-    float x = GetScreenWidth() / 4;
+    float x = GetScreenWidth() / 4.0f;
 
     if (GuiButton(Rectangle{ .x = x - 100, .y = y, .width = 200, .height = 60 }, "Time Attack")) 
     {
         g_game.mode = MODE_TIMEATTACK;
         _finish_screen = 2;
     };
-    if (GuiButton(Rectangle{ .x = x * 3 - 100, .y = y, .width = 200, .height = 60 }, "Count Attack")) 
+    if (GuiButton(Rectangle{ .x = x * 3 - 100, .y = y, .width = 200, .height = 60 }, "Move Attack")) 
     {
         g_game.mode = MODE_MOVEATTACK;
         _finish_screen = 2;

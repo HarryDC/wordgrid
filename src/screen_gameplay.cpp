@@ -467,7 +467,7 @@ void init_game_screen(void)
     _frames_counter = 0;
     _finish_screen = 0;
 
-    g_game.refresh_count = 3;
+    g_game.refresh_count = 5;
 
     _dictionary = dictionary_load("resources/text/en/words.txt");
     dictionary_load_distribution(&_dictionary, "resources/text/en/distribution.txt");
@@ -521,9 +521,12 @@ void draw_game_screen(void)
 {
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
 
-    Rectangle button_rect = { .x = 500, .y = 300, .width = (float)GetScreenWidth() - 500 - 20,
+    Rectangle button_rect = { .x = 500, .y = 0, .width = (float)GetScreenWidth() - 500 - 20,
     .height = (float)g_font_small.baseSize + 8 };
 
+    float button_spacing = button_rect.height + 8;
+    // Should just draw from bottom to top ...
+    button_rect.y = GetScreenHeight() - 20 - 3 * button_spacing;
     board_draw(&_board, _layout.board_pos, _layout.well_pos);
     if (_drag_info.is_dragging) {
         letters_draw(&_letters, _drag_info.letter, _drag_info.position, 0.25f);
@@ -544,11 +547,19 @@ void draw_game_screen(void)
     }
     if (!_show_help) GuiEnable();
 
-    button_rect.y += button_rect.height + 8;
+    button_rect.y += button_spacing;
 
     if (GuiButton(button_rect, "Help")) {
         _show_help = true;
     }
+    
+    button_rect.y += button_spacing;
+
+    if (GuiButton(button_rect, "Quit")) {
+        _finish_screen = 2;
+    }
+
+    
     if (_show_help) GuiEnable();
 
     mode_draw_calls[g_game.mode](&g_game);

@@ -83,8 +83,8 @@ int main(void)
     
 
     // Setup and init first screen
-    g_currentScreen = TITLE;
-    init_title_screen();
+    g_currentScreen = LOGO;
+    init_logo_screen();
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -260,7 +260,7 @@ static void UpdateDrawFrame(void)
                 update_game_screen();
 
                 if (finish_game_screen() == 1) TransitionToScreen(ENDING);
-                //else if (FinishGameplayScreen() == 2) TransitionToScreen(TITLE);
+                else if (finish_game_screen() == 2) TransitionToScreen(TITLE);
 
             } break;
             case ENDING:
