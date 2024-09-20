@@ -55,7 +55,7 @@ typedef enum GameScreen { UNKNOWN = -1, LOGO = 0, TITLE, OPTIONS, GAMEPLAY, ENDI
 //----------------------------------------------------------------------------------
 extern GameScreen g_currentScreen;
 extern Font g_font_small;
-extern Font g_font_big;
+extern Font g_font_large;
 
 enum GameMode {
     MODE_NONE = -1,
@@ -64,19 +64,16 @@ enum GameMode {
     MODE_COUNT,
 };
 
-struct GameSettings {
-    GameMode mode;
-};
-
-extern GameSettings g_game_settings;
-
 struct Game {
+    GameMode mode;
     int word_count = 0;
     int trash_count = 0;
     int move_count = 0;
     int refresh_count = 0;
+    float elapsed_time = 0;
 };
 
+extern Game g_game;
 
 #ifdef __cplusplus
 extern "C" {            // Prevents name mangling of functions

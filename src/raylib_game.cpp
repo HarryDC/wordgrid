@@ -32,8 +32,10 @@
 //----------------------------------------------------------------------------------
 GameScreen g_currentScreen = LOGO;
 Font g_font_small = { 0 };
-GameSettings g_game_settings;
+Font g_font_large = { 0 };
 Font g_default_font = { 0 };
+
+Game g_game{};
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -73,6 +75,8 @@ int main(void)
     // Load global data (assets that must be available in all screens, i.e. font)
     g_font_small = LoadFontEx("resources/fredoka_medium.ttf",24, nullptr, 0);
     g_default_font = g_font_small;
+
+    g_font_large = LoadFontEx("resources/fredoka_medium.ttf", 96, nullptr, 0);
 
     GuiSetFont(g_font_small);
     GuiSetStyle(DEFAULT, TEXT_SIZE, 24);

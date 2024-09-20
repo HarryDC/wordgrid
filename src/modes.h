@@ -47,14 +47,3 @@ void mode_moveattack_init();
 void mode_moveattack_draw(Game* game);
 bool mode_moveattack_update(Game* game);
 void mode_moveattack_unload();
-
-
-struct ModeData {
-    GameMode mode = MODE_NONE;
-    union {
-        ModeMoveAttack moveattack_data;
-        ModeTimeAttack timeattack_data;
-    };
-};
-
-extern ModeData g_mode_data;

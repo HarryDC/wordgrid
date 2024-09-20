@@ -140,8 +140,6 @@ static char _help_text[] = "Form words by dragging tiles from the line of tiles 
 
 static bool _show_help = false;
 
-static Game _game;
-
 float ease_out_cubic(float t) {
     float val = 1.0f - t;
     return 1.f - val * val * val;
@@ -413,12 +411,12 @@ static void drag_update(DragInfo* drag, Board* board) {
                 board->well[drag->original_index] = dictionary_get_letter_or_special(&_dictionary);
                 CheckResult result = board_check_words(board, &_dictionary, x, y);
                 board_clear_words(board, x, y, result);
-                _game.move_count += 1;
+                g_game.move_count += 1;
                 if (result == CHECK_RESULT_BOTH) {
-                    _game.word_count += 2;
+                    g_game.word_count += 2;
                 }
                 else if (result != CHECK_RESULT_NONE) {
-                    _game.word_count += 1;
+                    g_game.word_count += 1;
                 }
                 drop_success = true;
             }
@@ -466,7 +464,7 @@ void init_game_screen(void)
     _frames_counter = 0;
     _finish_screen = 0;
 
-    _game.refresh_count = 3;
+    g_game.refresh_count = 3;
 
     _dictionary = dictionary_load("resources/text/en/words.txt");
     dictionary_load_distribution(&_dictionary, "resources/text/en/distribution.txt");
@@ -492,13 +490,15 @@ void init_game_screen(void)
     _layout.tile_size = tile_size;
 
     // Init the game mode
-    mode_init_calls[g_game_settings.mode]();
+    mode_init_calls[g_game.mode]();
 }
 
 // Gameplay Screen Update logic
 void update_game_screen(void)
 {
     if (_show_help) return;
+
+    g_game.elapsed_time += GetFrameTime();
 
     input_update(&_drag_info);
     drag_update(&_drag_info, &_board);
@@ -507,7 +507,7 @@ void update_game_screen(void)
         _animation.letter = -1;
     }
 
-    bool run_again = mode_update_calls[g_game_settings.mode](&_game);
+    bool run_again = mode_update_calls[g_game.mode](&g_game);
     if (!run_again) {
         _finish_screen = 1;
     }
@@ -534,9 +534,9 @@ void draw_game_screen(void)
     //    board_reset(&_board);
     //}
 
-    if (_show_help || _game.refresh_count <= 0) GuiDisable();
-    if (GuiButton(button_rect, TextFormat("Refresh (%d)", _game.refresh_count))) {
-        --_game.refresh_count;
+    if (_show_help || g_game.refresh_count <= 0) GuiDisable();
+    if (GuiButton(button_rect, TextFormat("Refresh (%d)", g_game.refresh_count))) {
+        --g_game.refresh_count;
         board_reset_well(&_board);
     }
     if (!_show_help) GuiEnable();
@@ -548,7 +548,7 @@ void draw_game_screen(void)
     }
     if (_show_help) GuiEnable();
 
-    mode_draw_calls[g_game_settings.mode](&_game);
+    mode_draw_calls[g_game.mode](&g_game);
 
     if (_show_help) {
         GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_TOP);   // WARNING: Word-wrap does not work as expected in case of no-top alignment
@@ -556,7 +556,7 @@ void draw_game_screen(void)
         Rectangle box = Rectangle{ .x = 40, .y = 40, 
             .width = (float)GetScreenWidth() - 80, .height = (float)GetScreenHeight() - 120 };
         GuiPanel(box, nullptr);
-        GuiTextBox(box , _help_text, strlen(_help_text), false);
+        GuiTextBox(box , _help_text, (int)strlen(_help_text), false);
         GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, TEXT_WRAP_NONE);
         GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_MIDDLE);
 

@@ -26,6 +26,7 @@
 #include "raylib.h"
 #include "raygui.h"
 #include "screens.h"
+#include "raylib-extras.h"
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -43,6 +44,8 @@ void init_title_screen(void)
     // TODO: Initialize TITLE screen variables here!
     _frames_counter = 0;
     _finish_screen = 0;
+
+    g_game = Game{ 0 };
 }
 
 enum AnchorType {
@@ -54,6 +57,8 @@ enum AnchorType {
     ANCHOR_LEFT = 0x1 << 4,
     ANCHOR_RIGHT = 0x1 << 5
 };
+
+static const char* body_text = "Choose your letters wisely and keep going as long as you can !";
 
 // Title Screen Update logic
 void update_title_screen(void)
@@ -71,22 +76,22 @@ void update_title_screen(void)
 // Title Screen Draw logic
 void draw_title_screen(void)
 {
-    // TODO: Draw TITLE screen here!
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), GRAY);
-    Vector2 pos = { 20, 10 };
-    DrawTextEx(g_font_small, "WORD GRID", pos, g_font_small.baseSize*3.0f, 4, DARKGREEN);
+    float y = 20;
+    DrawTextCenteredHorizontally(g_font_large, "WORDGRID", y, 1.0, DARKGREEN);
+    y += g_font_large.baseSize + 12;
+    DrawTextCenteredHorizontally(g_font_small, body_text, y, 1.0, BLACK);
 
-    float y = GetScreenHeight() / 3.0f;
-    float x = GetScreenWidth() / 2.0 - 100.0;
+    y = GetScreenHeight() / 2.0f;
+    float x = GetScreenWidth() / 4;
 
-    if (GuiButton(Rectangle{ .x = x, .y = y, .width = 200, .height = 60 }, "Time Attack")) 
+    if (GuiButton(Rectangle{ .x = x - 100, .y = y, .width = 200, .height = 60 }, "Time Attack")) 
     {
-        g_game_settings.mode = MODE_TIMEATTACK;
+        g_game.mode = MODE_TIMEATTACK;
         _finish_screen = 2;
     };
-    if (GuiButton(Rectangle{ .x = x, .y = y + 100, .width = 200, .height = 60 }, "Count Attack")) 
+    if (GuiButton(Rectangle{ .x = x * 3 - 100, .y = y, .width = 200, .height = 60 }, "Count Attack")) 
     {
-        g_game_settings.mode = MODE_MOVEATTACK;
+        g_game.mode = MODE_MOVEATTACK;
         _finish_screen = 2;
     };
 }

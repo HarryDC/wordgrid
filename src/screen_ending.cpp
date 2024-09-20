@@ -25,6 +25,10 @@
 
 #include "raylib.h"
 #include "screens.h"
+#include "modes.h"
+#include "raylib-extras.h"
+
+#include <math.h>
 
 //----------------------------------------------------------------------------------
 // Module Variables Definition (local)
@@ -59,12 +63,41 @@ void update_ending_screen(void)
 // Ending Screen Draw logic
 void draw_ending_screen(void)
 {
-    // TODO: Draw ENDING screen here!
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLUE);
+    float y = 20;
+    float x = 20;
+    DrawTextCenteredHorizontally(g_font_large, "GAME OVER", y, 1.0, DARKGREEN);
+    y += g_font_large.baseSize + 12;
 
-    Vector2 pos = { 20, 10 };
-    DrawTextEx(g_font_small, "ENDING SCREEN", pos, g_font_small.baseSize*3.0f, 4, DARKBLUE);
-    DrawText("PRESS ENTER or TAP to RETURN to TITLE SCREEN", 120, 220, 20, DARKBLUE);
+    int minutes = (int)(g_game.elapsed_time / 60);
+    int seconds = (int)(g_game.elapsed_time - minutes * 60.0f);
+
+    switch (g_game.mode) {
+    case (MODE_TIMEATTACK):
+    {
+        const char* text;
+        text = TextFormat("You managed to survive for %d minutes and %d seconds.",
+            minutes, seconds);
+        DrawTextDefault(text, x, y, BLACK);
+        y += g_font_small.baseSize + 8;
+        
+        text = TextFormat("You completed %d words !", g_game.word_count);
+        DrawTextDefault(text, x, y, BLACK);
+        break;
+    }
+    case (MODE_MOVEATTACK):
+    {
+        const char* text;
+        text = TextFormat("You played for %d minutes and %d seconds.",
+            minutes, seconds);
+        y += g_font_small.baseSize + 8;
+
+        text = TextFormat("You completed %d words !", g_game.word_count);
+        DrawTextDefault(text, x, y, BLACK);
+        break;
+    }
+    }
+    DrawTextCenteredHorizontally(g_font_small,
+        "Press any key to return to the title screen", GetScreenHeight() / 4.0f * 3.0f, 1.0, BLACK);
 }
 
 // Ending Screen Unload logic
