@@ -29,8 +29,7 @@
 #include "screens.h"
 
 #include "dictionary.h"
-#include "mode_timeattack.h"
-#include "mode_moveattack.h"
+#include "modes.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -138,6 +137,7 @@ static char _help_text[] = "Form words by dragging tiles from the line of tiles 
 "By pushing `Refresh` you can swap out the list of letters that is available to you but you can only do "
 "that as many times as indicated in the button\n\n"
 "Have Fun and Good Luck!";
+
 static bool _show_help = false;
 
 static Game _game;

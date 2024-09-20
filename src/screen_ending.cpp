@@ -37,7 +37,7 @@ static int _finish_screen = 0;
 //----------------------------------------------------------------------------------
 
 // Ending Screen Initialization logic
-void InitEndingScreen(void)
+void init_ending_screen(void)
 {
     // TODO: Initialize ENDING screen variables here!
     _frames_counter = 0;
@@ -45,7 +45,7 @@ void InitEndingScreen(void)
 }
 
 // Ending Screen Update logic
-void UpdateEndingScreen(void)
+void update_ending_screen(void)
 {
     // TODO: Update ENDING screen variables here!
 
@@ -57,7 +57,7 @@ void UpdateEndingScreen(void)
 }
 
 // Ending Screen Draw logic
-void DrawEndingScreen(void)
+void draw_ending_screen(void)
 {
     // TODO: Draw ENDING screen here!
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), BLUE);
@@ -68,13 +68,13 @@ void DrawEndingScreen(void)
 }
 
 // Ending Screen Unload logic
-void UnloadEndingScreen(void)
+void unload_ending_screen(void)
 {
     // TODO: Unload ENDING screen variables here!
 }
 
 // Ending Screen should finish?
-int FinishEndingScreen(void)
+int finish_ending_screen(void)
 {
     return _finish_screen;
 }

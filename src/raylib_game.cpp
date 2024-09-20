@@ -100,10 +100,10 @@ int main(void)
     // Unload current screen data before closing
     switch (g_currentScreen)
     {
-        case LOGO: UnloadLogoScreen(); break;
+        case LOGO: unload_logo_screen(); break;
         case TITLE: unload_title_screen(); break;
         case GAMEPLAY: unload_game_screen(); break;
-        case ENDING: UnloadEndingScreen(); break;
+        case ENDING: unload_ending_screen(); break;
         default: break;
     }
 
@@ -127,20 +127,20 @@ static void ChangeToScreen(GameScreen screen)
     // Unload current screen
     switch (g_currentScreen)
     {
-        case LOGO: UnloadLogoScreen(); break;
+        case LOGO: unload_logo_screen(); break;
         case TITLE: unload_title_screen(); break;
         case GAMEPLAY: unload_game_screen(); break;
-        case ENDING: UnloadEndingScreen(); break;
+        case ENDING: unload_ending_screen(); break;
         default: break;
     }
 
     // Init next screen
     switch (screen)
     {
-        case LOGO: InitLogoScreen(); break;
+        case LOGO: init_logo_screen(); break;
         case TITLE: init_title_screen(); break;
         case GAMEPLAY: init_game_screen(); break;
-        case ENDING: InitEndingScreen(); break;
+        case ENDING: init_ending_screen(); break;
         default: break;
     }
 
@@ -173,21 +173,21 @@ static void UpdateTransition(void)
             // Unload current screen
             switch (transFromScreen)
             {
-                case LOGO: UnloadLogoScreen(); break;
+                case LOGO: unload_logo_screen(); break;
                 case TITLE: unload_title_screen(); break;
-                case OPTIONS: UnloadOptionsScreen(); break;
+                case OPTIONS: unload_options_screen(); break;
                 case GAMEPLAY: unload_game_screen(); break;
-                case ENDING: UnloadEndingScreen(); break;
+                case ENDING: unload_ending_screen(); break;
                 default: break;
             }
 
             // Load next screen
             switch (transToScreen)
             {
-                case LOGO: InitLogoScreen(); break;
+                case LOGO: init_logo_screen(); break;
                 case TITLE: init_title_screen(); break;
                 case GAMEPLAY: init_game_screen(); break;
-                case ENDING: InitEndingScreen(); break;
+                case ENDING: init_ending_screen(); break;
                 default: break;
             }
 
@@ -231,9 +231,9 @@ static void UpdateDrawFrame(void)
         {
             case LOGO:
             {
-                UpdateLogoScreen();
+                update_logo_screen();
 
-                if (FinishLogoScreen()) TransitionToScreen(TITLE);
+                if (finish_logo_screen()) TransitionToScreen(TITLE);
 
             } break;
             case TITLE:
@@ -246,9 +246,9 @@ static void UpdateDrawFrame(void)
             } break;
             case OPTIONS:
             {
-                UpdateOptionsScreen();
+                update_options_screen();
 
-                if (FinishOptionsScreen()) TransitionToScreen(TITLE);
+                if (finish_options_screen()) TransitionToScreen(TITLE);
 
             } break;
             case GAMEPLAY:
@@ -261,9 +261,9 @@ static void UpdateDrawFrame(void)
             } break;
             case ENDING:
             {
-                UpdateEndingScreen();
+                update_ending_screen();
 
-                if (FinishEndingScreen() == 1) TransitionToScreen(TITLE);
+                if (finish_ending_screen() == 1) TransitionToScreen(TITLE);
 
             } break;
             default: break;
@@ -280,11 +280,11 @@ static void UpdateDrawFrame(void)
 
         switch(g_currentScreen)
         {
-            case LOGO: DrawLogoScreen(); break;
+            case LOGO: draw_logo_screen(); break;
             case TITLE: draw_title_screen(); break;
-            case OPTIONS: DrawOptionsScreen(); break;
+            case OPTIONS: draw_options_screen(); break;
             case GAMEPLAY: draw_game_screen(); break;
-            case ENDING: DrawEndingScreen(); break;
+            case ENDING: draw_ending_screen(); break;
             default: break;
         }
 

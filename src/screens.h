@@ -55,8 +55,10 @@ typedef enum GameScreen { UNKNOWN = -1, LOGO = 0, TITLE, OPTIONS, GAMEPLAY, ENDI
 //----------------------------------------------------------------------------------
 extern GameScreen g_currentScreen;
 extern Font g_font_small;
+extern Font g_font_big;
 
 enum GameMode {
+    MODE_NONE = -1,
     MODE_TIMEATTACK,
     MODE_MOVEATTACK,
     MODE_COUNT,
@@ -83,11 +85,11 @@ extern "C" {            // Prevents name mangling of functions
 //----------------------------------------------------------------------------------
 // Logo Screen Functions Declaration
 //----------------------------------------------------------------------------------
-void InitLogoScreen(void);
-void UpdateLogoScreen(void);
-void DrawLogoScreen(void);
-void UnloadLogoScreen(void);
-int FinishLogoScreen(void);
+void init_logo_screen(void);
+void update_logo_screen(void);
+void draw_logo_screen(void);
+void unload_logo_screen(void);
+int finish_logo_screen(void);
 
 //----------------------------------------------------------------------------------
 // Title Screen Functions Declaration
@@ -101,11 +103,11 @@ int finish_title_screen(void);
 //----------------------------------------------------------------------------------
 // Options Screen Functions Declaration
 //----------------------------------------------------------------------------------
-void InitOptionsScreen(void);
-void UpdateOptionsScreen(void);
-void DrawOptionsScreen(void);
-void UnloadOptionsScreen(void);
-int FinishOptionsScreen(void);
+void init_options_screen(void);
+void update_options_screen(void);
+void draw_options_screen(void);
+void unload_options_screen(void);
+int finish_options_screen(void);
 
 //----------------------------------------------------------------------------------
 // Gameplay Screen Functions Declaration
@@ -119,11 +121,11 @@ int finish_game_screen(void);
 //----------------------------------------------------------------------------------
 // Ending Screen Functions Declaration
 //----------------------------------------------------------------------------------
-void InitEndingScreen(void);
-void UpdateEndingScreen(void);
-void DrawEndingScreen(void);
-void UnloadEndingScreen(void);
-int FinishEndingScreen(void);
+void init_ending_screen(void);
+void update_ending_screen(void);
+void draw_ending_screen(void);
+void unload_ending_screen(void);
+int finish_ending_screen(void);
 
 #ifdef __cplusplus
 }
