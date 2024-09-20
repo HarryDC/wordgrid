@@ -68,7 +68,7 @@ int main(void)
 {
     // Initialization
     //---------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "GridWords");
+    InitWindow(screenWidth, screenHeight, "Wordgrid");
 
     InitAudioDevice();      // Initialize audio device
 

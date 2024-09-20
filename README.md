@@ -1,23 +1,28 @@
------------------------------------
+# Wordgrid 
 
-_DISCLAIMER:_
+## Description
 
-Welcome to **raylib game template**!
+![WordGrid](screenshots/screenshot000.png "WordGrid Game Screen")
 
-This template provides a base structure to start developing a small raylib game in plain C. The repo is also pre-configured with a default `LICENSE` (zlib/libpng) and a `README.md` (this one) to be properly filled by users. Feel free to change the LICENSE as required.
+Wordgrid is a puzzle game, the goal of the game is to survive as long as possible. You 
+Form words by dragging tiles from the line of tiles into the grid, when a row or a column is filled the word 
+is removed and you get a score. Words can be made from left to right or from top to bottom. 
+There are three special tiles, you can activate them by dragging them onto the board 'x' will
+remove one tile, '|' will remove a whole column and '-' will remove a row. 
 
-All the sections defined by `$(Data to Fill)` are expected to be edited and filled properly. It's recommended to delete this disclaimer message after editing this `README.md` file.
+There are two game modes, Time Attack and Move Attack, in Time Attack your play time is limited but can be extended 
+by making words, in Move Attack your number of moves is limited but you can get more by making words.
 
-This template has been created to be used with raylib (www.raylib.com) and it's licensed under an unmodified zlib/libpng license.
+By clicking `Refresh` you can swap out the list of letters that is available to you but you can only do 
+that as many times as indicated in the button
 
-_Copyright (c) 2014-2024 Ramon Santamaria ([@raysan5](https://twitter.com/raysan5))_
+Have Fun and Good Luck!
 
------------------------------------
-## Getting Started with this template
+## Building
 
-You can use this templates in some ways. Using Visual Studio, using CMake or make your own build setup. This repository come with Visual Studio and CMake already setuped.
-
-Chose one of the follow setup, that fit in you development enviroment.
+Chose one of the follow setup, that fit in you development enviroment. Wordgrid uses the small game 
+development library [raylib](https://github.com/raysan5/raylib), [raygui](https://github.com/raysan5/raygui) 
+and is based on the [raylib-game-template](https://github.com/raysan5/raylib-game-template)
 
 ### Visual Studio
 
@@ -50,47 +55,8 @@ cmake --build build
 
 - Inside the build folder are another folder (named the same as the project name on CMakeLists.txt) with the executable and resources folder.
 
-## $(Game Title)
-
-![$(Game Title)](screenshots/screenshot000.png "$(Game Title)")
-
-### Description
-
-$(Your Game Description)
-
-### Features
-
- - $(Game Feature 01)
- - $(Game Feature 02)
- - $(Game Feature 03)
-
-### Controls
-
-Keyboard:
- - $(Game Control 01)
- - $(Game Control 02)
- - $(Game Control 03)
-
-### Screenshots
-
-_TODO: Show your game to the world, animated GIFs recommended!._
-
-### Developers
-
- - $(Developer 01) - $(Role/Tasks Developed)
- - $(Developer 02) - $(Role/Tasks Developed)
- - $(Developer 03) - $(Role/Tasks Developed)
-
-### Links
-
- - YouTube Gameplay: $(YouTube Link)
- - itch.io Release: $(itch.io Game Page)
- - Steam Release: $(Steam Game Page)
-
 ### License
 
 This game sources are licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
 
-$(Additional Licenses)
-
-*Copyright (c) $(Year) $(User Name) ($(User Twitter/GitHub Name))*
+*Copyright (c)2024 Harald Scheirich*

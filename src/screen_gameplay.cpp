@@ -391,11 +391,14 @@ static void drag_update(DragInfo* drag, Board* board) {
                 TraceLog(LOG_WARNING, "Mouse pickup error, index wrong [%s], ", index);
                 return;
             }
-            drag->is_dragging = true;
-            drag->letter = board->well[index];
-            drag->original_index = index;
-            board->well[index] = -1;
-            drag->position = mouse_pos;
+            if (board->well[index] >= 0) 
+            {
+                drag->is_dragging = true;
+                drag->letter = board->well[index];
+                drag->original_index = index;
+                board->well[index] = -1;
+                drag->position = mouse_pos;
+            }
         }
     }
     else if (_current_action == Action::Drop) {

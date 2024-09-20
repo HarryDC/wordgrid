@@ -2,7 +2,7 @@
 #include "screens.h"
 
 struct ModeTimeAttackParameters {
-    float initial_time = 10;
+    float initial_time = 300;
     int words_to_increase = 5;
     float time_increase = 30;
 };
