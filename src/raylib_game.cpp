@@ -1,15 +1,14 @@
 /*******************************************************************************************
 *
-*   raylib game template
-*
-*   <Game title>
-*   <Game description>
+*   WordGrid
+*   Simple Word Puzzle Game
+*   (C) Harald Scheirich 2024
+*   WordGrid is is licensed under an unmodified zlib/libpng license see LICENSE
 *
 *   This game has been created using raylib (www.raylib.com)
 *   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2021 Ramon Santamaria (@raysan5)
-*
+*   raylib is Copyright (c) 2021 Ramon Santamaria (@raysan5)
+*   This game was created using the raylib-game-template
 ********************************************************************************************/
 
 #include "raylib.h"

@@ -1,3 +1,13 @@
+/*******************************************************************************************
+*
+*   WordGrid
+*   Simple Word Puzzle Game
+*   (C) Harald Scheirich 2024
+*   WordGrid is is licensed under an unmodified zlib/libpng license see LICENSE
+*
+********************************************************************************************/
+#pragma once
+
 #include "raylib.h"
 #include "screens.h"
 
