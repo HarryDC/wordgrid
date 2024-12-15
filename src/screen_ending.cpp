@@ -68,8 +68,7 @@ void draw_ending_screen(void)
         DrawTextDefault(text, x, y, BLACK);
         break;
     }
-    case (MODE_MOVEATTACK):
-    {
+    case (MODE_MOVEATTACK): {
         const char* text;
         text = TextFormat("You played for %d minutes and %d seconds.",
             minutes, seconds);
@@ -79,6 +78,8 @@ void draw_ending_screen(void)
         DrawTextDefault(text, x, y, BLACK);
         break;
     }
+    default:
+        break;
     }
     DrawTextCenteredHorizontally(g_font_small,
         "Press any key to return to the title screen", GetScreenHeight() / 4.0f * 3.0f, 1.0, BLACK);
